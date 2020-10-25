@@ -1,0 +1,83 @@
+{
+	"manifest_version": 1,
+	"script": "skyrama.js",
+	"config": {
+		"groups": [
+			{
+				"name": "Auto Login",
+				"options": [
+					{
+						"id": "auto_login_username",
+						"type": "string",
+						"label": "Skyrama username for autologin"
+					},
+					{
+						"id": "auto_login_password",
+						"type": "password",
+						"label": "Skyrama password for autologin"
+					}
+				]
+			},
+			{
+				"name": "General",
+				"options": [
+					{
+						"id": "loggedin",
+						"type": "boolean",
+						"label": "Are you already logged in?",
+						"default": false
+					},
+					{
+						"id": "windowwait",
+						"type": "integer",
+						"label": "How long does it take to load the game and close all windows",
+						"default": 45
+					},
+					{
+						"id": "camerawait",
+						"type": "integer",
+						"label": "How long does it take to zoom out and position the camera that everything is visible?",
+						"default": 15
+					},
+					{
+						"id": "delay",
+						"type": "integer",
+						"label": "How many milliseconds should the bot wait for each task?",
+						"default": 0
+					},
+				]
+			},
+			{
+				"name": "Planes",
+				"options": [
+					{
+						"id": "runways",
+						"type": "integer",
+						"label": "How many planes can land at maximum at once?",
+						"default": 5,
+						"min": 1
+					},
+					{
+						"id": "startplanes",
+						"type": "integer",
+						"label": "How often can the bot click the Bar with 6 planes to start all/fill all parking spots?",
+						"default": 7,
+						"min": 1
+					},
+					{
+						"id": "buddies",
+						"type": "boolean",
+						"label": "Should planes from buddies be landed?",
+						"default": true
+					},
+					{
+						"id": "prefown",
+						"type": "integer",
+						"label": "How often should your own planes be landed compared to planes from buddies.",
+						"default": 2
+					}
+				]
+			}
+		]
+	}
+}
