@@ -19,6 +19,7 @@ var FLY_TEMPLATE = new Image("templates/fly.png");
 var BUDDYPLANE_TEMPLATE = new Image("templates/buddyplane.png");
 var TOWER_RED_TEMPLATE = new Image("templates/tower_red.png");
 var OK_TEMPLATE = new Image("templates/ok.png");
+var CANCEL_TEMPLATE = new Image("templates/cancel.png");
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -251,6 +252,15 @@ function checkOk() {
   Helper.msleep(125);
 }
 
+function checkCancel() {
+  var matches = Vision.findMatches(browser.takeScreenshot(), CANCEL_TEMPLATE, 0.98);
+  if(matches.length > 0) {
+    Helper.log("Clicked Cancel button.")
+    browser.leftClick(matches[0].getRect().getCenter());
+  }
+  Helper.msleep(125);
+}
+
 function wait() {
   var delay = Config.getValue("delay");
   if(delay > 0) {
@@ -279,6 +289,7 @@ function checkTasks() {
 
 function basicTasks() {
   checkOk();
+  checkCancel();
   wait();
   collectPeople();
   wait();

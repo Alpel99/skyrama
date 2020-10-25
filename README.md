@@ -14,6 +14,7 @@
 1. Click OK if a quest is completed or you level up
 1. Activate your tower to receive planes from buddies
 1. Counting started planes (Stats tab in botfather)
+1. Cancel fast processing if accidentally clicked
 
 ## Settings
 
