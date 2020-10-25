@@ -143,7 +143,7 @@ function getRings() {
 	Helper.log("Collecting from " + matches.length + " rings.");
 	for(var i = 0; i < matches.length; i++) {
 		toppoint = matches[i].getRect().getCenter();
-		for(var x = -45; x <= 45; x+=5) {
+		for(var x = -45; x <= 50; x+=5) {
 			for(var y = -10; y <= 65; y+=5) {
 				move = new Point(x, y);
 				movepoint = toppoint.pointAdded(move);
@@ -155,10 +155,7 @@ function getRings() {
 }
 
 function unpackPlanes() {
-	var matches = Vision.findMatches(browser.takeScreenshot(), UNPACK_TEMPLATE, 0.99);
-  Helper.log(matches);
-  var img = Vision.markMatches(browser.takeScreenshot(), matches, new Color(0,0,0), 2);
-  img.save("marks.png");
+	var matches = Vision.findMatches(browser.takeScreenshot(), UNPACK_TEMPLATE, 0.96);
 	Helper.log("Unpacking " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
@@ -178,7 +175,7 @@ function redcross() {
 function startPlanes() {
   redcross();
 	Helper.log("Starting planes.");
-	var match = Vision.findMatch(browser.takeScreenshot(), BUDDY_TEMPLATE, 0.99);
+	var match = Vision.findMatch(browser.takeScreenshot(), BUDDY_TEMPLATE, 0.98);
 	var nextbuddy = match.getRect().getCenter();
 	nextbuddy.setX(nextbuddy.getX() + 75);
 	browser.moveMouse(nextbuddy);
@@ -187,7 +184,7 @@ function startPlanes() {
 	Helper.sleep(1);
 	var starts = Config.getValue("startplanes");
 	for(var i = 0; i < starts; i++) {
-		var matches = Vision.findMatches(browser.takeScreenshot(), START_TEMPLATE, 0.99);
+		var matches = Vision.findMatches(browser.takeScreenshot(), START_TEMPLATE, 0.98);
 		for(var j = 0; j < matches.length; j++) {
 			browser.leftClick(matches[j].getRect().getCenter());
 			Helper.msleep(10);
@@ -200,7 +197,7 @@ function startPlanes() {
 }
 
 function fuelPlanes() {
-	var matches = Vision.findMatches(browser.takeScreenshot(), FUEL_TEMPLATE, 0.99);
+	var matches = Vision.findMatches(browser.takeScreenshot(), FUEL_TEMPLATE, 0.96);
 	Helper.log("Fueling " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
@@ -209,10 +206,7 @@ function fuelPlanes() {
 }
 
 function packPlanes() {
-	var matches = Vision.findMatches(browser.takeScreenshot(), PACK_TEMPLATE, 0.99);
-  Helper.log(matches);
-  var img = Vision.markMatches(browser.takeScreenshot(), matches, new Color(0,0,0), 2);
-  img.save("marks.png");
+	var matches = Vision.findMatches(browser.takeScreenshot(), PACK_TEMPLATE, 0.96);
 	Helper.log("Packing " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
@@ -233,7 +227,7 @@ function flyPlanes() {
 
 function activateTower() {
   redcross();
-  var matches = Vision.findMatches(browser.takeScreenshot(), TOWER_RED_TEMPLATE, 0.98);
+  var matches = Vision.findMatches(browser.takeScreenshot(), TOWER_RED_TEMPLATE, 0.96);
   if(matches.length > 0) {
     Helper.log("Activating Tower.");
     browser.leftClick(matches[1].getRect().getCenter());
@@ -251,7 +245,10 @@ function checkOk() {
 }
 
 function wait() {
-  Helper.msleep(Config.getValue("delay"));
+  var delay = Config.getValue("delay");
+  if(delay > 0) {
+    Helper.msleep(delay);
+  }
 }
 
 function checkTasks() {
