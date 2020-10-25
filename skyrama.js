@@ -230,7 +230,7 @@ function activateTower() {
   var matches = Vision.findMatches(browser.takeScreenshot(), TOWER_RED_TEMPLATE, 0.96);
   if(matches.length > 0) {
     Helper.log("Activating Tower.");
-    browser.leftClick(matches[1].getRect().getCenter());
+    browser.leftClick(matches[0].getRect().getCenter());
   }
   Helper.msleep(100);
 }
