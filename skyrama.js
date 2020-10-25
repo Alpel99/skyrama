@@ -86,7 +86,7 @@ function landPlanes() {
   var matches = Vision.findMatches(browser.takeScreenshot(), LAND_TEMPLATE, 0.99, maxLandings);
 	for(var i = 0; i < matches.length; i++) {
 		click(LAND_TEMPLATE, 0.99);
-		Helper.msleep(100);
+		Helper.msleep(250);
 	}
   Helper.log("Landed " + matches.length + " planes.");
   if(matches.length > 0) {
@@ -291,9 +291,11 @@ function main() {
     wait();
     checkTasks();
     wait();
-    for(var i = 0; i < Config.getValue("prefown"); i++) {
-      landPlanes();
-      wait();
+    if(Config.getValue("land")) {
+      for(var i = 0; i < Config.getValue("prefown"); i++) {
+        landPlanes();
+        wait();
+      }
     }
     redcross();
     wait();
@@ -303,7 +305,9 @@ function main() {
     wait();
     redcross();
     wait();
-    startPlanes();
+    if(Config.getValue("start")) {
+      startPlanes();
+    }
     wait();
     checkTasks();
     wait();

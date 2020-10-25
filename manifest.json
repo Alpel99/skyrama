@@ -51,6 +51,18 @@
 				"name": "Game",
 				"options": [
 					{
+						"id": "start",
+						"type": "boolean",
+						"label": "Should your planes be started?",
+						"default": true
+					},
+					{
+						"id": "land",
+						"type": "boolean",
+						"label": "Should your own planes be landed?",
+						"default": true
+					},
+					{
 						"id": "runways",
 						"type": "integer",
 						"label": "How many planes can land at maximum at once?",

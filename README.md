@@ -21,6 +21,8 @@
 1. Starting the bot without auto login -> you are already logged in from before/did it yourself
 1. Time to wait for closing ads/popups
 1. Delay between each task from the bot
+1. Option to enable/disable starting your planes (e.g. to start them yourself for quest)
+1. Option to enable/disable landing your planes
 1. Maximum planes to land at once (including helicopters/water planes)
 1. How many planes to start at once (not really useful atm)
 1. Option to enable/disable to land planes from buddies
@@ -30,3 +32,4 @@
 ## Known Issues
 
 1. Sometimes not everything from the loot on the ring is collected (does pick everything up on second try)
+1. Unpack/pack is registering with the same template (not really an issue)
