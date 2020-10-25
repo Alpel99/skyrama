@@ -42,7 +42,7 @@
 					{
 						"id": "delay",
 						"type": "integer",
-						"label": "How many milliseconds should the bot wait for each task?",
+						"label": "How many seconds should the bot wait for each task?",
 						"default": 0
 					}
 				]

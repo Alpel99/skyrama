@@ -254,7 +254,7 @@ function checkOk() {
 function wait() {
   var delay = Config.getValue("delay");
   if(delay > 0) {
-    Helper.msleep(delay);
+    Helper.sleep(delay);
   }
 }
 
