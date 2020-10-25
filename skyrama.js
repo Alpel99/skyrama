@@ -64,7 +64,12 @@ function closeWindows() {
 		Helper.sleep(5);
 	}
 	Helper.log("Please go fullscreen and zoom as far out as possible! (The Bot doesn't move the camera itself)");
-	Helper.sleep(Config.getValue("camerawait"));
+  var time = Config.getValue("camerawait");
+  for(var i = 0; i < time; i+=5) {
+    var remaining = time-i;
+    Helper.log("Time remaining: " + remaining);
+    Helper.sleep(5);
+  }
 }
 
 function collectPeople() {
@@ -100,6 +105,7 @@ function landPlanes() {
       }
     }
   }
+  checkTasks();
 }
 
 function landBuddyPlanes() {
@@ -126,6 +132,7 @@ function landBuddyPlanes() {
       }
     }
   }
+  checkTasks();
 }
 
 function arrowPlanes() {
