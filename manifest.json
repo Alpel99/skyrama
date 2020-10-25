@@ -48,7 +48,7 @@
 				]
 			},
 			{
-				"name": "Planes",
+				"name": "Game",
 				"options": [
 					{
 						"id": "runways",
@@ -60,7 +60,7 @@
 					{
 						"id": "startplanes",
 						"type": "integer",
-						"label": "How often can the bot click the Bar with 6 planes to start all/fill all parking spots?",
+						"label": "How often can the bot click the bar with 6 planes to start all/fill all parking spots?",
 						"default": 7,
 						"min": 1
 					},
@@ -71,9 +71,15 @@
 						"default": true
 					},
 					{
+						"id": "tower",
+						"type": "boolean",
+						"label": "Should the tower be activated to recieve planes from everyone?",
+						"default": true
+					},
+					{
 						"id": "prefown",
 						"type": "integer",
-						"label": "How often should your own planes be landed compared to planes from buddies.",
+						"label": "How often should your own planes be landed (X) compared to planes from buddies. (X:1)",
 						"default": 2
 					}
 				]

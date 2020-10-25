@@ -275,7 +275,9 @@ function basicTasks() {
   wait();
   collectPeople();
   wait();
-  activateTower();
+  if(Config.getValue("tower")) {
+    activateTower();
+  }
   wait();
 }
 
