@@ -33,10 +33,10 @@ function loadWebsiteLogin() {
 	var passwd = Config.getValue("auto_login_password");
 	Helper.log("Loading game website.");
 
-  browser.loadUrl("skyrama.com");
+  browser.loadUrl("https://www.skyrama.com/");
 	browser.finishLoading();
 
-  Helper.sleep(2);
+  Helper.sleep(5);
 	Helper.log("Entering account credentials.");
 
 	var fill_uname_js = "document.getElementById('bgcdw_login_form_username').value = '" + username + "';";
