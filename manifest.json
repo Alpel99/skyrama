@@ -93,6 +93,12 @@
 						"type": "integer",
 						"label": "How often should your own planes be landed (X) compared to planes from buddies. (X:1)",
 						"default": 2
+					},
+					{
+						"id": "ring_iters",
+						"type": "integer",
+						"label": "How often should the rings should be collected directly after each other (to increase chance of hitting everything)",
+						"default": 1
 					}
 				]
 			}

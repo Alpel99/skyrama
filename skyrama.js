@@ -1,5 +1,7 @@
 var browser = new Browser("Skyrama", new Size(1920, 1080));
 var startedplanes = 0;
+var runtime = 0;
+var GLOBAL_TIMER = new Timer();
 
 var PEOPLE_TEMPLATE = new Image("templates/people.png");
 var PLANES_TEMPLATE = new Image("templates/planes.png");
@@ -20,6 +22,7 @@ var BUDDYPLANE_TEMPLATE = new Image("templates/buddyplane.png");
 var TOWER_RED_TEMPLATE = new Image("templates/tower_red.png");
 var OK_TEMPLATE = new Image("templates/ok.png");
 var CANCEL_TEMPLATE = new Image("templates/cancel.png");
+var COOKIE_ACCEPT_TEMPLATE = new Image("templates/cookies.png");
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -57,6 +60,8 @@ function loadWebsiteLogin() {
 }
 
 function closeWindows() {
+  click(COOKIE_ACCEPT_TEMPLATE, 0.95);
+	Helper.sleep(1);
 	Helper.log("Please close all ad windows, etc.");
 	var time = Config.getValue("windowwait");
 	for(var i = 0; i < time; i+=5) {
@@ -147,19 +152,21 @@ function arrowPlanes() {
 }
 
 function getRings() {
-  var matches = Vision.findMatches(browser.takeScreenshot(), RING_TEMPLATE, 0.96);
-	Helper.log("Collecting from " + matches.length + " rings.");
-	for(var i = 0; i < matches.length; i++) {
-		toppoint = matches[i].getRect().getCenter();
-		for(var x = -45; x <= 50; x+=5) {
-			for(var y = -10; y <= 65; y+=5) {
-				move = new Point(x, y);
-				movepoint = toppoint.pointAdded(move);
-				browser.moveMouse(movepoint);
-				Helper.msleep(1);
-			}
-		}
-	}
+  for(var j = 0; j < Config.getValue("ring_iters"); j++) {
+    var matches = Vision.findMatches(browser.takeScreenshot(), RING_TEMPLATE, 0.96);
+    Helper.log("Collecting from " + matches.length + " rings.");
+    for(var i = 0; i < matches.length; i++) {
+      toppoint = matches[i].getRect().getCenter();
+      for(var x = -45; x <= 50; x+=5) {
+        for(var y = -10; y <= 65; y+=5) {
+          move = new Point(x, y);
+          movepoint = toppoint.pointAdded(move);
+          browser.moveMouse(movepoint);
+          Helper.msleep(1);
+        }
+      }
+    }
+  }
 }
 
 function unpackPlanes() {
@@ -231,6 +238,9 @@ function flyPlanes() {
 	}
 	startedplanes += matches.length;
   Stats.show("General", "Started planes", startedplanes);
+  var dtime = GLOBAL_TIMER.getElapsedTime()/1000
+  Stats.show("General", "Time", Math.floor(dtime/60).toString() + ":" +  Math.round(dtime%60).toString());
+  Stats.show("Advanced", "Planes/min", startedplanes/(dtime/60));
 }
 
 function activateTower() {
@@ -300,10 +310,14 @@ function basicTasks() {
 }
 
 function main() {
+  Stats.show("General", "Started planes", startedplanes);
+  Stats.show("General", "Time", 0);
+  Stats.show("Advanced", "Planes/min", 0);
   if(Config.getValue("loggedin") == false) {
     loadWebsiteLogin();
     closeWindows();
   }
+  GLOBAL_TIMER.start()
   while (true) {
     basicTasks();
     wait();
@@ -319,14 +333,14 @@ function main() {
     wait();
     if(Config.getValue("buddies")) {
       landBuddyPlanes();
+      wait();
+      redcross();
+      wait();
     }
-    wait();
-    redcross();
-    wait();
     if(Config.getValue("start")) {
       startPlanes();
+      wait();
     }
-    wait();
     checkTasks();
     wait();
   }
