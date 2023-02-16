@@ -238,8 +238,10 @@ function flyPlanes() {
 	}
 	startedplanes += matches.length;
   Stats.show("General", "Started planes", startedplanes);
-  var dtime = GLOBAL_TIMER.getElapsedTime()/1000
-  Stats.show("General", "Time", Math.floor(dtime/60).toString() + ":" +  Math.round(dtime%60).toString());
+  var dtime = GLOBAL_TIMER.getElapsedTime()/1000;
+  var r = Math.round(dtime%60)
+  var secs = r < 10 ? "0" + r.toString() : r.toString()
+  Stats.show("General", "Time", Math.floor(dtime/60).toString() + ":" +  secs);
   Stats.show("Advanced", "Planes/min", startedplanes/(dtime/60));
 }
 
