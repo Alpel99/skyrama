@@ -43,7 +43,7 @@
 						"id": "delay",
 						"type": "integer",
 						"label": "How many seconds should the bot wait for each task?",
-						"default": 0
+						"default": 1
 					}
 				]
 			},
@@ -63,19 +63,11 @@
 						"default": true
 					},
 					{
-						"id": "runways",
-						"type": "integer",
-						"label": "How many planes can land at maximum at once?",
-						"default": 5,
-						"min": 1
-					},
-					{
-						"id": "startplanes",
-						"type": "integer",
-						"label": "How often can the bot click the bar with 6 planes to start all/fill all parking spots?",
-						"default": 7,
-						"min": 1
-					},
+                        "id": "quick_service",
+                        "type": "boolean",
+                        "label": "Check for quick service?",
+                        "default": "false"
+                    },
 					{
 						"id": "buddies",
 						"type": "boolean",
@@ -92,13 +84,34 @@
 						"id": "prefown",
 						"type": "integer",
 						"label": "How often should your own planes be landed (X) compared to planes from buddies. (X:1)",
-						"default": 2
+						"default": 2,
+						"min": 1
+					}
+				]
+			},
+			{
+				"name": "Tuning",
+				"options": [
+					{
+						"id": "runways",
+						"type": "integer",
+						"label": "How many planes can land at maximum at once?",
+						"default": 5,
+						"min": 1
+					},
+					{
+						"id": "startplanes",
+						"type": "integer",
+						"label": "How often can the bot click the bar with 6 planes to start all/fill all parking spots?",
+						"default": 7,
+						"min": 1
 					},
 					{
 						"id": "ring_iters",
 						"type": "integer",
 						"label": "How often should the rings should be collected directly after each other (to increase chance of hitting everything)",
-						"default": 1
+						"default": 1,
+						"min": 1
 					}
 				]
 			}

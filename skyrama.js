@@ -1,7 +1,9 @@
 var browser = new Browser("Skyrama", new Size(1920, 1080));
 var startedplanes = 0;
-var runtime = 0;
+var qs_done = 0;
 var GLOBAL_TIMER = new Timer();
+var CHECK_QUICK_SERVICE = Config.getValue("quick_service");
+var QS_AVAILABLE = false;
 
 var PEOPLE_TEMPLATE = new Image("templates/people.png");
 var PLANES_TEMPLATE = new Image("templates/planes.png");
@@ -23,6 +25,7 @@ var TOWER_RED_TEMPLATE = new Image("templates/tower_red.png");
 var OK_TEMPLATE = new Image("templates/ok.png");
 var CANCEL_TEMPLATE = new Image("templates/cancel.png");
 var COOKIE_ACCEPT_TEMPLATE = new Image("templates/cookies.png");
+var QS_TEMPLATE = new Image("templates/QS.png");
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -104,12 +107,7 @@ function landPlanes() {
     var timer = new Timer();
     timer.start();
     checkTasks();
-    var con = false;
-    while(con == false) {
-      if(timer.getElapsedTime() > 8000) {
-        con = true;
-      }
-    }
+    while(!timer.hasExpired(8000)) {}
   }
   checkTasks();
 }
@@ -131,12 +129,7 @@ function landBuddyPlanes() {
     var timer = new Timer();
     timer.start();
     checkTasks();
-    var con = false;
-    while(con == false) {
-      if(timer.getElapsedTime() > 8000) {
-        con = true;
-      }
-    }
+    while(!timer.hasExpired(8000)) {}
   }
   checkTasks();
 }
@@ -237,12 +230,7 @@ function flyPlanes() {
 		Helper.msleep(100);
 	}
 	startedplanes += matches.length;
-  Stats.show("General", "Started planes", startedplanes);
-  var dtime = GLOBAL_TIMER.getElapsedTime()/1000;
-  var r = Math.round(dtime%60)
-  var secs = r < 10 ? "0" + r.toString() : r.toString()
-  Stats.show("General", "Time", Math.floor(dtime/60).toString() + ":" +  secs);
-  Stats.show("Advanced", "Planes/min", startedplanes/(dtime/60));
+  setStats(GLOBAL_TIMER.getElapsedTime(), startedplanes);
 }
 
 function activateTower() {
@@ -274,29 +262,64 @@ function checkCancel() {
 }
 
 function wait() {
-  var delay = Config.getValue("delay");
-  if(delay > 0) {
-    Helper.sleep(delay);
+  if(Config.getValue("delay") > 0) {
+    Helper.msleep(125);
   }
 }
 
+function useQS() {
+  var matches = Vision.findMatches(browser.takeScreenshot(), QS_TEMPLATE, 0.96);
+  if(matches.length > 0) {
+    Helper.log("Found and used QS button.");
+    QS_AVAILABLE = true;
+    for(var i = 0; i < matches.length; i++) {
+      browser.leftClick(matches[i].getRect().getCenter());
+      qs_done++;
+      Helper.msleep(100);
+    }
+  } else {
+    Helper.log("NO QS button found.")
+    QS_AVAILABLE = false;
+  }
+  Stats.show("Quick Service", "QS clicked", qs_done);
+  Stats.show("Advanced", "QS/min", (qs_done/(GLOBAL_TIMER.getElapsedTime()/60000)).toFixed(2));
+}
+
+function setStats(time, startedplanes) {
+  Stats.show("General", "Started planes", startedplanes);
+  Stats.show("General", "Started planes", startedplanes);
+  var dtime = time/1000;
+  var rs = Math.round(dtime%60)
+  var secs = rs < 10 ? "0" + rs.toString() : rs.toString()
+  var rm = Math.round((dtime/60)%60)
+  var mins = rm < 10 ? "0" + rm.toString() : rm.toString()
+  Stats.show("General", "Time", Math.floor((dtime/60)/60).toString() + ":" + mins + ":" +  secs);
+  Stats.show("Advanced", "Planes/min", (startedplanes/(dtime/60)).toFixed(2));
+}
+
 function checkTasks() {
-  flyPlanes();
-  wait();
-  arrowPlanes();
-  wait();
-  getRings();
-  wait();
-  unpackPlanes();
-  wait();
-  packPlanes();
-  wait();
-  fuelPlanes();
-  wait();
-  flyPlanes();
-  wait();
-  getRings();
-  wait();
+  if(CHECK_QUICK_SERVICE) {
+    useQS();
+    wait();
+  }
+  if(!QS_AVAILABLE) {
+    flyPlanes();
+    wait();
+    arrowPlanes();
+    wait();
+    getRings();
+    wait();
+    unpackPlanes();
+    wait();
+    packPlanes();
+    wait();
+    fuelPlanes();
+    wait();
+    flyPlanes();
+    wait();
+    getRings();
+    wait();
+  }
 }
 
 function basicTasks() {
@@ -312,9 +335,7 @@ function basicTasks() {
 }
 
 function main() {
-  Stats.show("General", "Started planes", startedplanes);
-  Stats.show("General", "Time", 0);
-  Stats.show("Advanced", "Planes/min", 0);
+  setStats(0, startedplanes);
   if(Config.getValue("loggedin") == false) {
     loadWebsiteLogin();
     closeWindows();
