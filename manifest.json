@@ -107,6 +107,20 @@
 						"min": 1
 					},
 					{
+						"id": "ring_delay",
+						"type": "integer",
+						"label": "How many ms should the bot wait at each point while collecting over the rings?",
+						"default": 20,
+						"min": 1
+					},					
+					{
+						"id": "ring_points",
+						"type": "integer",
+						"label": "How many points should be used to go over one ring?",
+						"default": 20,
+						"min": 5
+					},
+					{
 						"id": "ring_iters",
 						"type": "integer",
 						"label": "How often should the rings should be collected directly after each other (to increase chance of hitting everything)",

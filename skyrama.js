@@ -2,7 +2,6 @@ var browser = new Browser("Skyrama", new Size(1920, 1080));
 var startedplanes = 0;
 var qs_done = 0;
 var GLOBAL_TIMER = new Timer();
-var CHECK_QUICK_SERVICE = Config.getValue("quick_service");
 var QS_AVAILABLE = false;
 
 var PEOPLE_TEMPLATE = new Image("templates/people.png");
@@ -10,7 +9,10 @@ var PLANES_TEMPLATE = new Image("templates/planes.png");
 var LANDINGPLANES_DOWN_TEMPLATE = new Image("templates/landingplanes_down.png");
 var LAND_TEMPLATE = new Image("templates/land.png");
 var ARROW_TEMPLATE = new Image("templates/arrow.png");
-var RING_TEMPLATE = new Image("templates/ringtop.png");
+var RING_TOP_TEMPLATE = new Image("templates/ringtop.png");
+var RING_TEMPLATE = new Image("templates/ring.png");
+var RING_FULL_TEMPLATE = new Image("templates/ring_closed.png");
+var RING_WHITE_TPL = new Image("templates/ring_white.png");
 var UNPACK_TEMPLATE = new Image("templates/unpack.png");
 var PACK_TEMPLATE = new Image("templates/pack.png");
 var CROSS_TEMPLATE = new Image("templates/redcross.png");
@@ -146,17 +148,22 @@ function arrowPlanes() {
 
 function getRings() {
   for(var j = 0; j < Config.getValue("ring_iters"); j++) {
-    var matches = Vision.findMatches(browser.takeScreenshot(), RING_TEMPLATE, 0.96);
+    c1 = new Color(37, 234, 200, "hsv");
+    c2 = new Color(43, 255, 230, "hsv");
+    var move = new Point(150,60);
+    var matches = Vision.findMatches(browser.takeScreenshot().copy(new Rect(move, new Point(1920, 910))).isolateColorRange(c1, c2, false), RING_WHITE_TPL, 0.95);
     Helper.log("Collecting from " + matches.length + " rings.");
+    var n = Config.getValue("ring_points");
+    var dx = 27, dy = 22, oy = -3, ox = 2, s = 2*Math.PI/n
     for(var i = 0; i < matches.length; i++) {
-      toppoint = matches[i].getRect().getCenter();
-      for(var x = -45; x <= 50; x+=5) {
-        for(var y = -10; y <= 65; y+=5) {
-          move = new Point(x, y);
-          movepoint = toppoint.pointAdded(move);
-          browser.moveMouse(movepoint);
-          Helper.msleep(1);
-        }
+      toppoint = matches[i].getRect().getCenter().pointAdded(move);
+      var d = Config.getValue("ring_delay");
+      for(var j = 0; j < n; j++) {
+        var x = dx*Math.cos(j*s) + ox
+        var y = dy*Math.sin(j*s)+dy+oy
+        var movepoint = toppoint.pointAdded(new Point(x, y));
+        browser.moveMouse(movepoint);
+        Helper.msleep(d);
       }
     }
   }
@@ -298,7 +305,7 @@ function setStats(time, startedplanes) {
 }
 
 function checkTasks() {
-  if(CHECK_QUICK_SERVICE) {
+  if(Config.getValue("quick_service")) {
     useQS();
     wait();
   }
@@ -336,7 +343,7 @@ function basicTasks() {
 
 function main() {
   setStats(0, startedplanes);
-  if(Config.getValue("loggedin") == false) {
+  if(Config.getValue("loggedin") == false || browser.getUrl() != "https://www.skyrama.com/game/playNow") {
     loadWebsiteLogin();
     closeWindows();
   }
@@ -369,4 +376,4 @@ function main() {
   }
 }
 
-main();
+main()
