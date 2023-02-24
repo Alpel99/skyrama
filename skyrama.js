@@ -10,8 +10,6 @@ var LANDINGPLANES_DOWN_TEMPLATE = new Image("templates/landingplanes_down.png");
 var LAND_TEMPLATE = new Image("templates/land.png");
 var ARROW_TEMPLATE = new Image("templates/arrow.png");
 var RING_TOP_TEMPLATE = new Image("templates/ringtop.png");
-var RING_TEMPLATE = new Image("templates/ring.png");
-var RING_FULL_TEMPLATE = new Image("templates/ring_closed.png");
 var RING_WHITE_TPL = new Image("templates/ring_white.png");
 var UNPACK_TEMPLATE = new Image("templates/unpack.png");
 var PACK_TEMPLATE = new Image("templates/pack.png");
@@ -151,7 +149,7 @@ function getRings() {
     c1 = new Color(37, 234, 200, "hsv");
     c2 = new Color(43, 255, 230, "hsv");
     var move = new Point(150,60);
-    var matches = Vision.findMatches(browser.takeScreenshot().copy(new Rect(move, new Point(1920, 910))).isolateColorRange(c1, c2, false), RING_WHITE_TPL, 0.95);
+    var matches = Vision.findMatches(browser.takeScreenshot().copy(new Rect(move, new Point(1920, 910))).isolateColorRange(c1, c2, false), RING_WHITE_TPL, 0.94);
     Helper.log("Collecting from " + matches.length + " rings.");
     var n = Config.getValue("ring_points");
     var dx = 27, dy = 22, oy = -3, ox = 2, s = 2*Math.PI/n
