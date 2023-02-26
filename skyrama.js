@@ -16,6 +16,7 @@ var PACK_TEMPLATE = new Image("templates/pack.png");
 var CROSS_TEMPLATE = new Image("templates/redcross.png");
 var DARKCROSS_TEMPLATE = new Image("templates/darkcross.png");
 var BUDDY_TEMPLATE = new Image("templates/newbuddy.png");
+var BUDDY_FLAG_TEMPLATE = new Image("templates/buddy_flag_tpl.png");
 var GO_TEMPLATE = new Image("templates/go.png");
 var START_TEMPLATE = new Image("templates/start.png");
 var FUEL_TEMPLATE = new Image("templates/fuel.png");
@@ -131,6 +132,7 @@ function landBuddyPlanes() {
     checkTasks();
     while(!timer.hasExpired(8000)) {}
   }
+  hideBuddyFlags();
   checkTasks();
 }
 
@@ -236,6 +238,16 @@ function flyPlanes() {
 	}
 	startedplanes += matches.length;
   setStats(GLOBAL_TIMER.getElapsedTime(), startedplanes);
+}
+
+function hideBuddyFlags() {
+  var move = new Point(30, 30)
+  var matches = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
+  Helper.log("Clicking on " + matches.length + " triangles beneath on planes that have arrows to possibly hide buddy flags.");
+	for(var i = 0; i < matches.length; i++) {
+		browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
+		Helper.msleep(125);
+	}
 }
 
 function activateTower() {
