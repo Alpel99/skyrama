@@ -155,7 +155,7 @@ function arrowPlanes() {
 }
 
 function getRings() {
-  for(var j = 0; j < Config.getValue("ring_iters"); j++) {
+  for(var k = 0; k < Config.getValue("ring_iters"); k++) {
     c1 = new Color(37, 234, 200, "hsv");
     c2 = new Color(43, 255, 230, "hsv");
     var move = new Point(150,60);
