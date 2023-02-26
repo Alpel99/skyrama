@@ -9,12 +9,12 @@
 					{
 						"id": "auto_login_username",
 						"type": "string",
-						"label": "Skyrama username for autologin"
+						"label": "Skyrama username for autologin:"
 					},
 					{
 						"id": "auto_login_password",
 						"type": "password",
-						"label": "Skyrama password for autologin"
+						"label": "Skyrama password for autologin:"
 					}
 				]
 			},
@@ -24,13 +24,13 @@
 					{
 						"id": "loggedin",
 						"type": "boolean",
-						"label": "Are you already logged in?",
-						"default": false
+						"label": "Are you already logged in? (Will check for skyrama url anyways.)",
+						"default": true
 					},
 					{
 						"id": "windowwait",
 						"type": "integer",
-						"label": "How long does it take to load the game and close all windows",
+						"label": "How long does it take to load the game and close all windows?",
 						"default": 45
 					},
 					{
@@ -42,8 +42,9 @@
 					{
 						"id": "delay",
 						"type": "integer",
-						"label": "How many seconds should the bot wait for each task?",
-						"default": 1
+						"label": "How many X*10 ms should the bot wait for each task? (X=10 => 100ms)",
+						"default": 10,
+						"min": 0
 					}
 				]
 			},
@@ -66,7 +67,7 @@
                         "id": "quick_service",
                         "type": "boolean",
                         "label": "Check for quick service?",
-                        "default": "false"
+                        "default": false
                     },
 					{
 						"id": "buddies",
@@ -84,7 +85,7 @@
 						"id": "prefown",
 						"type": "integer",
 						"label": "How often should your own planes be landed (X) compared to planes from buddies. (X:1)",
-						"default": 2,
+						"default": 1,
 						"min": 1
 					}
 				]
@@ -100,12 +101,26 @@
 						"min": 1
 					},
 					{
-						"id": "startplanes",
+						"id": "startplanes_row",
 						"type": "integer",
-						"label": "How often can the bot click the bar with 6 planes to start all/fill all parking spots?",
-						"default": 7,
+						"label": "How often to click on the bar with 6 planes to fill all parking spots?",
+						"default": 5,
 						"min": 1
 					},
+					{
+						"id": "startplanes_single",
+						"type": "integer",
+						"label": "How often to click on a single spot of the bar to fill parking spots? (this is inside the loop from the number above)",
+						"default": 3,
+						"min": 1
+					},
+					{
+						"id": "task_iter",
+						"type": "integer",
+						"label": "How often should the basic tasks be done? (land - X*tasks - start - X*tasks) (>1 useful for quick planes)",
+						"default": 1,
+						"min": 1
+					},	
 					{
 						"id": "ring_delay",
 						"type": "integer",
@@ -123,7 +138,7 @@
 					{
 						"id": "ring_iters",
 						"type": "integer",
-						"label": "How often should the rings should be collected directly after each other (to increase chance of hitting everything)",
+						"label": "How often should the rings should be collected directly after each other? (to increase chance of hitting everything)",
 						"default": 1,
 						"min": 1
 					}

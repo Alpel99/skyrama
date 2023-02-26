@@ -16,7 +16,6 @@ var PACK_TEMPLATE = new Image("templates/pack.png");
 var CROSS_TEMPLATE = new Image("templates/redcross.png");
 var DARKCROSS_TEMPLATE = new Image("templates/darkcross.png");
 var BUDDY_TEMPLATE = new Image("templates/newbuddy.png");
-var BUDDY_FLAG_TEMPLATE = new Image("templates/buddy_flag_tpl.png");
 var GO_TEMPLATE = new Image("templates/go.png");
 var START_TEMPLATE = new Image("templates/start.png");
 var FUEL_TEMPLATE = new Image("templates/fuel.png");
@@ -67,16 +66,14 @@ function closeWindows() {
   click(COOKIE_ACCEPT_TEMPLATE, 0.95);
 	Helper.sleep(1);
 	Helper.log("Please close all ad windows, etc.");
-	var time = Config.getValue("windowwait");
-	for(var i = 0; i < time; i+=5) {
-		var remaining = time-i;
+	for(var i = 0; i < Config.getValue("windowwait"); i+=5) {
+		var remaining = Config.getValue("windowwait")-i;
 		Helper.log("Please close windows. Time remaining: " + remaining);
 		Helper.sleep(5);
 	}
 	Helper.log("Please go fullscreen and zoom as far out as possible! (The Bot doesn't move the camera itself)");
-  var time = Config.getValue("camerawait");
-  for(var i = 0; i < time; i+=5) {
-    var remaining = time-i;
+  for(var i = 0; i < Config.getValue("camerawait"); i+=5) {
+    var remaining = Config.getValue("camerawait")-i;
     Helper.log("Time remaining: " + remaining);
     Helper.sleep(5);
   }
@@ -91,49 +88,60 @@ function collectPeople() {
 	}
 }
 
-function landPlanes() {
-	var maxLandings = Config.getValue("runways");
-	Helper.log("Trying to land " + maxLandings + " planes.");
+function landOwnPlanes() {
+  redcross();
 	click(PLANES_TEMPLATE, 0.99);
-	Helper.sleep(1);
+	Helper.msleep(500);
 	click(LANDINGPLANES_DOWN_TEMPLATE, 0.95);
-	Helper.sleep(1);
-  var matches = Vision.findMatches(browser.takeScreenshot(), LAND_TEMPLATE, 0.99, maxLandings);
-	for(var i = 0; i < matches.length; i++) {
-		click(LAND_TEMPLATE, 0.99);
-		Helper.msleep(250);
-	}
-  Helper.log("Landed " + matches.length + " planes.");
-  if(matches.length > 0) {
-    var timer = new Timer();
-    timer.start();
-    checkTasks();
-    while(!timer.hasExpired(8000)) {}
-  }
-  checkTasks();
+  Helper.log("Trying to land " + Config.getValue("runways") + " planes.");
+	Helper.msleep(500);
+
+  landPlanes(false);
 }
 
 function landBuddyPlanes() {
-  var maxLandings = Config.getValue("runways");
-	Helper.log("Trying to land " + maxLandings + " planes from Buddies.");
+  redcross();
 	click(PLANES_TEMPLATE, 0.99);
-	Helper.sleep(1);
+	Helper.msleep(500);
 	click(BUDDYPLANE_TEMPLATE, 0.90);
-	Helper.sleep(1);
+  Helper.log("Trying to land " + Config.getValue("runways") + " planes from Buddies.");
+	Helper.msleep(500);
+
+  landPlanes(true);
+}
+
+function landPlanes(buddy) {
+	var maxLandings = Config.getValue("runways");
   var matches = Vision.findMatches(browser.takeScreenshot(), LAND_TEMPLATE, 0.99, maxLandings);
+  if (maxLandings > 6 && matches.length == 6) {
+    var diff = maxLandings - matches.length;
+    var maxx = 0;
+    var rmatch;
+    matches.forEach(function(m) {
+      if(m.getRect().getCenter().getX() > maxx) {
+        maxx = m.getRect().getCenter().getX();
+        rmatch = m;
+      }
+    });
+    for (var i = 0; i < diff; i++) {
+      browser.leftClick(rmatch.getRect().getCenter());
+      Helper.msleep(250);
+    }
+  }
 	for(var i = 0; i < matches.length; i++) {
-		click(LAND_TEMPLATE, 0.99);
-		Helper.msleep(100);
+		browser.leftClick(matches[i].getRect().getCenter());
+		Helper.msleep(250);
 	}
-  Helper.log("Landed " + matches.length + " planes.");
+  var l = matches.length < 6 ? matches.length : 6 + " to " + maxLandings;
+  Helper.log("Landed " + l + " planes.");
   if(matches.length > 0) {
     var timer = new Timer();
     timer.start();
-    checkTasks();
+    checkTasks(true);
     while(!timer.hasExpired(8000)) {}
   }
-  hideBuddyFlags();
-  checkTasks();
+  if(buddy) hideBuddyFlags();
+  checkTasks(false);
 }
 
 function arrowPlanes() {
@@ -181,11 +189,13 @@ function unpackPlanes() {
 function redcross() {
   Helper.msleep(250);
 	Helper.log("Clicking red cross.");
-	click(CROSS_TEMPLATE,0.95);
-  click(DARKCROSS_TEMPLATE,0.95);
+  //don't press logout
+  var match = Vision.findMatch(browser.takeScreenshot(), CROSS_TEMPLATE, 0.95);
+  if (match.getRect().getCenter().getY() > 60) browser.leftClick(match.getRect().getCenter());
+  var match = Vision.findMatch(browser.takeScreenshot(), DARKCROSS_TEMPLATE, 0.95);
+  if (match.getRect().getCenter().getY() > 60) browser.leftClick(match.getRect().getCenter());
 	Helper.msleep(250);
 }
-
 
 function startPlanes() {
   redcross();
@@ -196,19 +206,20 @@ function startPlanes() {
 	browser.moveMouse(nextbuddy);
 	Helper.sleep(1);
 	click(GO_TEMPLATE,0.98);
-	Helper.sleep(1);
-	var starts = Config.getValue("startplanes");
-	for(var i = 0; i < starts; i++) {
+	Helper.msleep(500);
+	for(var i = 0; i < Config.getValue("startplanes_row"); i++) {
 		var matches = Vision.findMatches(browser.takeScreenshot(), START_TEMPLATE, 0.98);
 		for(var j = 0; j < matches.length; j++) {
-			browser.leftClick(matches[j].getRect().getCenter());
-			Helper.msleep(10);
-			browser.leftClick(matches[j].getRect().getCenter());
-			Helper.msleep(100);
+      for(var k = 0; k < Config.getValue("startplanes_single"); k++) {
+        browser.leftClick(matches[j].getRect().getCenter());
+        Helper.msleep(10);
+        browser.leftClick(matches[j].getRect().getCenter());
+        Helper.msleep(100);
+      }
 		}
 	}
-	Helper.sleep(2);
-	arrowPlanes();
+	// Helper.sleep(2);
+	// arrowPlanes();
 }
 
 function fuelPlanes() {
@@ -279,9 +290,7 @@ function checkCancel() {
 }
 
 function wait() {
-  if(Config.getValue("delay") > 0) {
-    Helper.msleep(125);
-  }
+    Helper.msleep(10*Config.getValue("delay"));
 }
 
 function useQS() {
@@ -292,7 +301,7 @@ function useQS() {
     for(var i = 0; i < matches.length; i++) {
       browser.leftClick(matches[i].getRect().getCenter());
       qs_done++;
-      Helper.msleep(100);
+      Helper.msleep(125);
     }
   } else {
     Helper.log("NO QS button found.")
@@ -314,28 +323,31 @@ function setStats(time, startedplanes) {
   Stats.show("Advanced", "Planes/min", (startedplanes/(dtime/60)).toFixed(2));
 }
 
-function checkTasks() {
+function checkTasks(single) {
   if(Config.getValue("quick_service")) {
     useQS();
     wait();
   }
   if(!QS_AVAILABLE) {
-    flyPlanes();
-    wait();
-    arrowPlanes();
-    wait();
-    getRings();
-    wait();
-    unpackPlanes();
-    wait();
-    packPlanes();
-    wait();
-    fuelPlanes();
-    wait();
-    flyPlanes();
-    wait();
-    getRings();
-    wait();
+    iter = single ? 1 : Config.getValue("task_iter");
+    for(var i = 0; i < iter; i++) {
+      flyPlanes();
+      wait();
+      arrowPlanes();
+      wait();
+      getRings();
+      wait();
+      unpackPlanes();
+      wait();
+      packPlanes();
+      wait();
+      fuelPlanes();
+      wait();
+      flyPlanes();
+      wait();
+      getRings();
+      wait();
+    }
   }
 }
 
@@ -353,7 +365,7 @@ function basicTasks() {
 
 function main() {
   setStats(0, startedplanes);
-  if(Config.getValue("loggedin") == false || browser.getUrl() != "https://www.skyrama.com/game/playNow") {
+  if(Config.getValue("loggedin") != true || browser.getUrl() != "https://www.skyrama.com/game/playNow") {
     loadWebsiteLogin();
     closeWindows();
   }
@@ -361,27 +373,24 @@ function main() {
   while (true) {
     basicTasks();
     wait();
-    checkTasks();
+    checkTasks(false);
     wait();
     if(Config.getValue("land")) {
       for(var i = 0; i < Config.getValue("prefown"); i++) {
-        landPlanes();
+        landOwnPlanes();
         wait();
       }
     }
-    redcross();
     wait();
     if(Config.getValue("buddies")) {
       landBuddyPlanes();
-      wait();
-      redcross();
       wait();
     }
     if(Config.getValue("start")) {
       startPlanes();
       wait();
     }
-    checkTasks();
+    checkTasks(false);
     wait();
   }
 }
