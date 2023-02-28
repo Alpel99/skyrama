@@ -271,7 +271,7 @@ function startPlanesSelectedBuddy() {
     if(Config.getValue("start_green")) {
       var move = new Point(-34, -11)
       var col = img.getPixelColor(buddy.pointAdded(move));
-      if (col.getRed() < 100 && col.getGreen() > 170) {
+      if (col.getRed() < 100) {
         startPlanesBuddy(buddy); // green
       } else {
         Helper.log("Selected buddy not green. No fallback for this implemented.");
@@ -326,21 +326,23 @@ function startPlanesRandomBuddy() {
 	var match = Vision.findMatch(img, BUDDY_TEMPLATE, 0.98);
 	var nextbuddy = match.getRect().getCenter();
   var move = new Point(-25,-1);
+  nextbuddy.setX(nextbuddy.getX() + 79);
 
   if(Config.getValue("start_green") && max < 5) {
     var c = 0;
     for (var i = 0; i < 6; i++) {
       var col = img.getPixelColor(nextbuddy.pointAdded(move))
       nextbuddy.setX(nextbuddy.getX() + 79);
-      if (col.getRed() < 100 && col.getGreen() > 170) {
-        c++; // green
+      if (col.getRed() < 100) {
+        c++; // green/not gray
       }
     }
     max = c < max ? c : max;
+    if(Config.getValue("v_level") > 1) Helper.log(c + " green buddies found.");
   }
-  var t = Math.floor(Math.random() * max+1);
-  if(Config.getValue("v_level") > 0) Helper.log("Starting planes to buddy #" + (t+1) + ".");
-  startPlanesBuddy(match.getRect().getCenter().pointAdded(new Point((t+1)*79, 0)))
+  var t = Math.floor(Math.random() * max)+1;
+  if(Config.getValue("v_level") > 0) Helper.log("Starting planes to buddy #" + (t) + ".");
+  startPlanesBuddy(match.getRect().getCenter().pointAdded(new Point((t)*79, 0)))
 }
 
 /*
@@ -357,7 +359,7 @@ function startPlanesFirstBuddy() {
   if(Config.getValue("start_green")) {
     var move = new Point(-25,-1);
     var col = img.getPixelColor(nextbuddy.pointAdded(move))
-    if (col.getRed() < 100 && col.getGreen() > 170) {
+    if (col.getRed() < 100) {
       // green
       startPlanesBuddy(nextbuddy);
     } else {
