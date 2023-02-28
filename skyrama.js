@@ -3,6 +3,9 @@ var startedplanes = 0;
 var qs_done = 0;
 var GLOBAL_TIMER = new Timer();
 var QS_AVAILABLE = false;
+var START_FALLBACK = false;
+var BUDDY_SELECTED = false;
+var SEL_BUDDY_TEMPLATE;
 
 var PEOPLE_TEMPLATE = new Image("templates/people.png");
 var PLANES_TEMPLATE = new Image("templates/planes.png");
@@ -26,6 +29,10 @@ var OK_TEMPLATE = new Image("templates/ok.png");
 var CANCEL_TEMPLATE = new Image("templates/cancel.png");
 var COOKIE_ACCEPT_TEMPLATE = new Image("templates/cookies.png");
 var QS_TEMPLATE = new Image("templates/QS.png");
+var MAP_TEMPLATE = new Image("templates/map_tpl.png");
+var SELECT_TEMPLATE = new Image("templates/select.png");
+var NFLIGHT_TEMPLATE = new Image("templates/new_flight.png");
+
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -33,8 +40,6 @@ function click(tpl, trsh) {
 }
 
 function loadWebsiteLogin() {
-	var new_size = new Size(1920, 1080);
-	browser.resize(new_size);
 	var username = Config.getValue("auto_login_username");
 	var passwd = Config.getValue("auto_login_password");
 	Helper.log("Loading game website.");
@@ -81,7 +86,7 @@ function closeWindows() {
 
 function collectPeople() {
   var matches = Vision.findMatches(browser.takeScreenshot(), PEOPLE_TEMPLATE, 0.93);
-	Helper.log("Collecting passengers " + matches.length + "x.")
+	if(Config.getValue("v_level") > 1) Helper.log("Collecting passengers " + matches.length + "x.")
 	for(var i = 0; i < matches.length; i++) {
   	browser.moveMouse(matches[i].getRect().getCenter());
 		Helper.msleep(125);
@@ -93,7 +98,7 @@ function landOwnPlanes() {
 	click(PLANES_TEMPLATE, 0.99);
 	Helper.msleep(500);
 	click(LANDINGPLANES_DOWN_TEMPLATE, 0.95);
-  Helper.log("Trying to land " + Config.getValue("runways") + " planes.");
+  if(Config.getValue("v_level") > 1) Helper.log("Trying to land " + Config.getValue("runways") + " planes.");
 	Helper.msleep(500);
 
   landPlanes(false);
@@ -104,7 +109,7 @@ function landBuddyPlanes() {
 	click(PLANES_TEMPLATE, 0.99);
 	Helper.msleep(500);
 	click(BUDDYPLANE_TEMPLATE, 0.90);
-  Helper.log("Trying to land " + Config.getValue("runways") + " planes from Buddies.");
+  if(Config.getValue("v_level") > 1) Helper.log("Trying to land " + Config.getValue("runways") + " planes from Buddies.");
 	Helper.msleep(500);
 
   landPlanes(true);
@@ -133,20 +138,20 @@ function landPlanes(buddy) {
 		Helper.msleep(250);
 	}
   var l = matches.length < 6 ? matches.length : 6 + " to " + maxLandings;
-  Helper.log("Landed " + l + " planes.");
+  if(Config.getValue("v_level") > 0) Helper.log("Landed " + l + " planes.");
   if(matches.length > 0) {
     var timer = new Timer();
     timer.start();
     checkTasks(true);
     while(!timer.hasExpired(8000)) {}
+    if(buddy) hideBuddyFlags();
   }
-  if(buddy) hideBuddyFlags();
   checkTasks(false);
 }
 
 function arrowPlanes() {
 	var matches = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
-	Helper.log("Clicking on " + matches.length + " arrows.");
+	if(Config.getValue("v_level") > 1) Helper.log("Clicking on " + matches.length + " arrows.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(100);
@@ -160,7 +165,7 @@ function getRings() {
     c2 = new Color(43, 255, 230, "hsv");
     var move = new Point(150,60);
     var matches = Vision.findMatches(browser.takeScreenshot().copy(new Rect(move, new Point(1920, 910))).isolateColorRange(c1, c2, false), RING_WHITE_TPL, 0.94);
-    Helper.log("Collecting from " + matches.length + " rings.");
+    if(Config.getValue("v_level") > 1) Helper.log("Collecting from " + matches.length + " rings.");
     var n = Config.getValue("ring_points");
     var dx = 27, dy = 22, oy = -3, ox = 2, s = 2*Math.PI/n
     for(var i = 0; i < matches.length; i++) {
@@ -179,7 +184,7 @@ function getRings() {
 
 function unpackPlanes() {
 	var matches = Vision.findMatches(browser.takeScreenshot(), UNPACK_TEMPLATE, 0.96);
-	Helper.log("Unpacking " + matches.length + " planes.");
+	if(Config.getValue("v_level") > 1) Helper.log("Unpacking " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(100);
@@ -188,7 +193,7 @@ function unpackPlanes() {
 
 function redcross() {
   Helper.msleep(250);
-	Helper.log("Clicking red cross.");
+	if(Config.getValue("v_level") > 2) Helper.log("Clicking red cross.");
   //don't press logout
   var match = Vision.findMatch(browser.takeScreenshot(), CROSS_TEMPLATE, 0.95);
   if (match.getRect().getCenter().getY() > 60) browser.leftClick(match.getRect().getCenter());
@@ -199,32 +204,193 @@ function redcross() {
 
 function startPlanes() {
   redcross();
-	Helper.log("Starting planes.");
+  if(START_FALLBACK) {
+    if(Config.getValue("start_fallback")) {
+      Helper.log("FALLBACK: Starting planes to first buddy.");
+      startPlanesFirstBuddy();
+    } else {
+      Helper.log("FALLBACK: Not selected, no planes started.")
+    }
+  } else {
+    switch(Config.getValue("start_opt")) {
+      case "first":
+        if(Config.getValue("v_level") > 0) Helper.log("Starting planes to first buddy.");
+        startPlanesFirstBuddy();
+        break;
+      case "selected":
+        if(!BUDDY_SELECTED) {
+          createBuddyTemplate();
+        } else {
+          startPlanesSelectedBuddy();
+        }
+        if(Config.getValue("v_level") > 0) Helper.log("Starting planes to selected buddy #" + Config.getValue("start_num") + ".");
+        break;
+      case "country":
+        if(Config.getValue("v_level") > 0) Helper.log("Starting planes to country.");
+        for (var i = 0; i < Config.getValue("start_num"); i++) {
+          startPlanesCountry();
+        }
+        break;
+      case "random":
+        if(Config.getValue("v_level") > 0) Helper.log("Starting planes to random buddy, up to " + Config.getValue("start_num") + ".");
+        startPlanesRandomBuddy();
+        break;
+    }
+  }
+}
+
+function createBuddyTemplate() {
+  redcross();
+  var img = browser.takeScreenshot();
+	var match = Vision.findMatch(img, BUDDY_TEMPLATE, 0.98);
+  if(match.isValid()) {
+    var sel_buddy_point = match.getRect().getTopLeft().pointAdded(new Point(Config.getValue("start_num")*79, 6));
+    var sel_buddy = img.copy(new Rect(sel_buddy_point.pointAdded(new Point(20,0)), new Size(55, 85)))
+    sel_buddy.save("selectedbuddy.png");
+    BUDDY_SELECTED = true;
+    if(Config.getValue("v_level") > 0) Helper.log("Created new selected buddy template 'selectedbuddy.png'.")
+    Helper.msleep(500);
+    SEL_BUDDY_TEMPLATE = new Image("selectedbuddy.png");
+    Helper.msleep(500);
+  } else {
+    Helper.log("Something went wrong with the buddy selection.");
+  }
+}
+
+function startPlanesSelectedBuddy() {
+  var img = browser.takeScreenshot();
+  var checkBuddy = Vision.findMatch(img, SEL_BUDDY_TEMPLATE, 0.98);
+  if(!checkBuddy.isValid()) {
+    var checknot = Config.getValue("start_fallback") ? " " : " not ";
+    Helper.log("Buddy no longer found," + checknot + "using fallback");
+    START_FALLBACK = true;
+  } else {
+    var buddy = checkBuddy.getRect().getCenter()
+    if(Config.getValue("start_green")) {
+      var move = new Point(-34, -11)
+      var col = img.getPixelColor(buddy.pointAdded(move));
+      if (col.getRed() < 100 && col.getGreen() > 170) {
+        startPlanesBuddy(buddy); // green
+      } else {
+        Helper.log("Selected buddy not green. No fallback for this implemented.");
+      }
+    } else {
+      startPlanesBuddy(buddy);
+    }
+  }
+}
+
+function startPlanesCountry() {
+  redcross();
+	click(PLANES_TEMPLATE, 0.99);
+	Helper.msleep(500);
+  browser.takeScreenshot().save("test.png")
+	click(NFLIGHT_TEMPLATE, 0.85);
+  Helper.msleep(500);
+  var checkGo = Vision.findMatch(browser.takeScreenshot(), START_TEMPLATE, 0.98);
+  if(!checkGo.isValid()) {
+    if(Config.getValue("v_level") > 0) Helper.log("No planes to start available.");
+    return;
+  }
+  browser.leftClick(checkGo.getRect().getCenter());
+  Helper.msleep(500);
+  var checkMap = Vision.findMatch(browser.takeScreenshot(), MAP_TEMPLATE, 0.99);
+  if(!checkMap.isValid()) {
+    var checknot = Config.getValue("start_fallback") ? " " : " not ";
+    Helper.log("No country selected," + checknot + "using fallback");
+    START_FALLBACK = true;
+  } else {
+    Helper.sleep(2);
+    var checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+    if(!checkSelect.isValid()) {
+      Helper.sleep(3);
+      checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+    }
+    if(!checkSelect.isValid()) {
+      if(Config.getValue("v_level") > 0) Helper.log("No people in country to start to available.");
+    } else {
+      click(SELECT_TEMPLATE, 0.97);
+      Helper.msleep(125);
+      startPlanesClick();
+      redcross();
+    }
+  }
+}
+
+function startPlanesRandomBuddy() {
+  redcross();
+  var max = Config.getValue("start_num");
+  var img = browser.takeScreenshot();
+	var match = Vision.findMatch(img, BUDDY_TEMPLATE, 0.98);
+	var nextbuddy = match.getRect().getCenter();
+  var move = new Point(-25,-1);
+
+  if(Config.getValue("start_green") && max < 6) {
+    var c = 0;
+    for (var i = 0; i < 6; i++) {
+      var col = img.getPixelColor(nextbuddy.pointAdded(move))
+      nextbuddy.setX(nextbuddy.getX() + 79);
+      if (col.getRed() < 100 && col.getGreen() > 170) {
+        c++; // green
+      }
+    }
+    max = c < max ? c : max;
+  }
+  var t = Math.floor(Math.random() * max+1);
+  if(Config.getValue("v_level") > 0) Helper.log("Starting planes to buddy #" + t + ".");
+  startPlanesBuddy(match.getRect().getCenter().pointAdded(new Point((t+1)*79, 0)))
+}
+
+/*
+Color(r: 133, g: 148, b: 147) # buddy tpl
+Color(r: 51, g: 160, b: 71)   # green
+Color(r: 173, g: 175, b: 175) # gray
+*/
+
+function startPlanesFirstBuddy() {
+  redcross();
 	var match = Vision.findMatch(browser.takeScreenshot(), BUDDY_TEMPLATE, 0.98);
 	var nextbuddy = match.getRect().getCenter();
-	nextbuddy.setX(nextbuddy.getX() + 75);
-	browser.moveMouse(nextbuddy);
+  nextbuddy.setX(nextbuddy.getX() + 79);
+  if(Config.getValue("start_green")) {
+    var move = new Point(-25,-1);
+    var col = img.getPixelColor(nextbuddy.pointAdded(move))
+    if (col.getRed() < 100 && col.getGreen() > 170) {
+      // green
+      startPlanesBuddy(nextbuddy);
+    } else {
+      if(Config.getValue("v_level") > 1) Helper.log("No green buddy found.");
+    }
+  } else {
+    startPlanesBuddy(nextbuddy);
+  }
+}
+
+function startPlanesBuddy(nextbuddy) {
+  browser.moveMouse(nextbuddy);
 	Helper.sleep(1);
 	click(GO_TEMPLATE,0.98);
 	Helper.msleep(500);
+  startPlanesClick();
+}
+
+function startPlanesClick() {
 	for(var i = 0; i < Config.getValue("startplanes_row"); i++) {
 		var matches = Vision.findMatches(browser.takeScreenshot(), START_TEMPLATE, 0.98);
 		for(var j = 0; j < matches.length; j++) {
       for(var k = 0; k < Config.getValue("startplanes_single"); k++) {
         browser.leftClick(matches[j].getRect().getCenter());
-        Helper.msleep(10);
-        browser.leftClick(matches[j].getRect().getCenter());
         Helper.msleep(100);
+        browser.leftClick(matches[j].getRect().getCenter());
+        Helper.msleep(200);
       }
 		}
 	}
-	// Helper.sleep(2);
-	// arrowPlanes();
 }
 
 function fuelPlanes() {
 	var matches = Vision.findMatches(browser.takeScreenshot(), FUEL_TEMPLATE, 0.96);
-	Helper.log("Fueling " + matches.length + " planes.");
+	if(Config.getValue("v_level") > 1) Helper.log("Fueling " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(100);
@@ -233,7 +399,7 @@ function fuelPlanes() {
 
 function packPlanes() {
 	var matches = Vision.findMatches(browser.takeScreenshot(), PACK_TEMPLATE, 0.96);
-	Helper.log("Packing " + matches.length + " planes.");
+	if(Config.getValue("v_level") > 1) Helper.log("Packing " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(100);
@@ -242,7 +408,7 @@ function packPlanes() {
 
 function flyPlanes() {
 	var matches = Vision.findMatches(browser.takeScreenshot(), FLY_TEMPLATE, 0.96);
-	Helper.log("Flying " + matches.length + " planes.");
+	if(Config.getValue("v_level") > 1) Helper.log("Flying " + matches.length + " planes.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(100);
@@ -254,18 +420,19 @@ function flyPlanes() {
 function hideBuddyFlags() {
   var move = new Point(30, 30)
   var matches = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
-  Helper.log("Clicking on " + matches.length + " triangles beneath on planes that have arrows to possibly hide buddy flags.");
+  if(Config.getValue("v_level") > 1) Helper.log("Clicking on " + matches.length + " triangles beneath on planes that have arrows to possibly hide buddy flags.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
 		Helper.msleep(125);
 	}
+  Helper.msleep(125);
 }
 
 function activateTower() {
   redcross();
   var matches = Vision.findMatches(browser.takeScreenshot(), TOWER_RED_TEMPLATE, 0.96);
   if(matches.length > 0) {
-    Helper.log("Activating Tower.");
+    if(Config.getValue("v_level") > 2) Helper.log("Activating Tower.");
     browser.leftClick(matches[0].getRect().getCenter());
   }
   Helper.msleep(100);
@@ -274,7 +441,7 @@ function activateTower() {
 function checkOk() {
   var matches = Vision.findMatches(browser.takeScreenshot(), OK_TEMPLATE, 0.98);
   if(matches.length > 0) {
-    Helper.log("Clicked OK button.")
+    if(Config.getValue("v_level") > 2) Helper.log("Clicked OK button.")
     browser.leftClick(matches[0].getRect().getCenter());
   }
   Helper.msleep(125);
@@ -283,7 +450,7 @@ function checkOk() {
 function checkCancel() {
   var matches = Vision.findMatches(browser.takeScreenshot(), CANCEL_TEMPLATE, 0.98);
   if(matches.length > 0) {
-    Helper.log("Clicked Cancel button.")
+    if(Config.getValue("v_level") > 2) Helper.log("Clicked Cancel button.")
     browser.leftClick(matches[0].getRect().getCenter());
   }
   Helper.msleep(125);
@@ -296,7 +463,7 @@ function wait() {
 function useQS() {
   var matches = Vision.findMatches(browser.takeScreenshot(), QS_TEMPLATE, 0.96);
   if(matches.length > 0) {
-    Helper.log("Found and used QS button.");
+    if(Config.getValue("v_level") > 1) Helper.log("Found and used QS button.");
     QS_AVAILABLE = true;
     for(var i = 0; i < matches.length; i++) {
       browser.leftClick(matches[i].getRect().getCenter());
@@ -381,10 +548,11 @@ function main() {
         wait();
       }
     }
-    wait();
     if(Config.getValue("buddies")) {
-      landBuddyPlanes();
-      wait();
+      for(var i = 0; i < Config.getValue("prefbud"); i++) {
+        landBuddyPlanes();
+        wait();
+      }
     }
     if(Config.getValue("start")) {
       startPlanes();

@@ -19,7 +19,7 @@
 				]
 			},
 			{
-				"name": "General",
+				"name": "General (more info: README.MD)",
 				"options": [
 					{
 						"id": "loggedin",
@@ -43,7 +43,7 @@
 						"id": "delay",
 						"type": "integer",
 						"label": "How many X*10 ms should the bot wait for each task? (X=10 => 100ms)",
-						"default": 10,
+						"default": 20,
 						"min": 0
 					}
 				]
@@ -52,23 +52,11 @@
 				"name": "Game",
 				"options": [
 					{
-						"id": "start",
-						"type": "boolean",
-						"label": "Should your planes be started?",
-						"default": true
-					},
-					{
 						"id": "land",
 						"type": "boolean",
 						"label": "Should your own planes be landed?",
 						"default": true
 					},
-					{
-                        "id": "quick_service",
-                        "type": "boolean",
-                        "label": "Check for quick service?",
-                        "default": false
-                    },
 					{
 						"id": "buddies",
 						"type": "boolean",
@@ -82,17 +70,73 @@
 						"default": true
 					},
 					{
-						"id": "prefown",
+                        "id": "quick_service",
+                        "type": "boolean",
+                        "label": "Check for quick service? (Will use if avail, will do normal work if it is not.)",
+                        "default": false
+                    }
+				]
+			},
+			{
+				"name": "Start Planes",
+				"options": [
+					{
+						"id": "start",
+						"type": "boolean",
+						"label": "Should your planes be started?",
+						"default": true
+					},
+					{
+						"id": "start_opt",
+						"type": "choice",
+						"label": "How to start planes?\nThe buddy options only work for buddies on the first page.",
+						"default": "first",
+						"choices": {
+							"To the first buddy": "first",
+							"To a selected buddy": "selected",
+							"To a random buddy of the 5 shown": "random",
+							"To a country": "country"
+						}
+					},
+					{
+						"id": "start_fallback",
+						"type": "boolean",
+						"label": "If something goes wrong with e.g. starting to country:\nShould the bot fall back to using the first buddy?\nRestart bot to reset once fallback happened.",
+						"default": true
+					},
+					{
+						"id": "start_num",
 						"type": "integer",
-						"label": "How often should your own planes be landed (X) compared to planes from buddies. (X:1)",
+						"label": "Which current place does the buddy to send planes to have?\nAlternatively used as maximum index for random selection.\nAlso: How often the country start is iterated per action.",
 						"default": 1,
-						"min": 1
+						"min": 1,
+						"max": 5
+					},
+					{
+						"id": "start_green",
+						"type": "boolean",
+						"label": "Check for first/selected/random buddy to be green in order to send to them?",
+						"default": false
 					}
 				]
 			},
 			{
 				"name": "Tuning",
 				"options": [
+					{
+						"id": "prefown",
+						"type": "integer",
+						"label": "How often should your own planes be landed (X) compared to planes from buddies. (X:<value below>)\nThese are iterations which are done consecutively.",
+						"default": 1,
+						"min": 1
+					},
+					{
+						"id": "prefbud",
+						"type": "integer",
+						"label": "How often should your buddies planes be landed (X) compared to planes your own. (<value above>:X)",
+						"default": 1,
+						"min": 1
+					},
 					{
 						"id": "runways",
 						"type": "integer",
@@ -104,7 +148,7 @@
 						"id": "startplanes_row",
 						"type": "integer",
 						"label": "How often to click on the bar with 6 planes to fill all parking spots?",
-						"default": 5,
+						"default": 4,
 						"min": 1
 					},
 					{
@@ -120,7 +164,19 @@
 						"label": "How often should the basic tasks be done? (land - X*tasks - start - X*tasks) (>1 useful for quick planes)",
 						"default": 1,
 						"min": 1
-					},	
+					},
+					{
+						"id": "ring_iters",
+						"type": "integer",
+						"label": "How often should the rings should be collected directly after each other? (to increase chance of hitting everything)",
+						"default": 1,
+						"min": 1
+					}
+				]
+			},
+			{
+				"name": "Advanced",
+				"options": [	
 					{
 						"id": "ring_delay",
 						"type": "integer",
@@ -134,13 +190,14 @@
 						"label": "How many points should be used to go over one ring?",
 						"default": 20,
 						"min": 5
-					},
+					},					
 					{
-						"id": "ring_iters",
+						"id": "v_level",
 						"type": "integer",
-						"label": "How often should the rings should be collected directly after each other? (to increase chance of hitting everything)",
+						"label": "Verbosity level - How much output do you want? (0-3)",
 						"default": 1,
-						"min": 1
+						"min": 0,
+						"max": 3
 					}
 				]
 			}
