@@ -27,6 +27,7 @@
 - [ ] Unpack/pack is registering with the same template (not really an issue)
 - [ ] Untangle that code into multiple files
 - [ ] Order landing matches by descending x value
+- [ ] Could probably improve performance by cutting some openCV calls
 
 
 ### Might also work with english, not tested
@@ -52,17 +53,18 @@
 * Option to enable/disable landing planes from buddies
 * Option to enable/disable to activate the tower to receive planes
 * Option to enable/disable check for quick service
+    * the bot will fall back to generic service if it detects qs to be unavailable
 
 #### Start planes
 * Option to enable/disable starting your planes
 * Choose the way how planes should be started:
     * To the first buddy: Always use the first buddy in the list
     * To a selected buddy: Preselect a buddy by its current position
-        * bot will screenshot him and try to find him again
-    * To a random buddy: Choose a random buddy from the list
+        * bot will save an image and try to find him again
+    * To a random buddy: Choose a random buddy of the first (up to 5) from the list
     * To a country: send planes to a country
-        * this needs to be preselected by sendind one plane there before starting the bot
-    * _only the first five buddies can be used, scrolling in the buddy list is nor possible/will stop the bot from working_
+        * this needs to be preselected by sending one plane there before starting the bot
+    * _only the first five buddies can be used, scrolling in the buddy list is not possible/will stop the bot from working_
 * A number input that has different uses depending on the starting options:
     * Selected buddy: Choose buddy by index
     * Random buddy: How many random buddies

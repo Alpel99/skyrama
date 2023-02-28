@@ -138,7 +138,8 @@ function landPlanes(buddy) {
 		Helper.msleep(250);
 	}
   var l = matches.length < 6 ? matches.length : 6 + " to " + maxLandings;
-  if(Config.getValue("v_level") > 0) Helper.log("Landed " + l + " planes.");
+  var b = buddy ? " from buddies." : ".";
+  if(Config.getValue("v_level") > 0) Helper.log("Landed " + l + " planes" + b);
   if(matches.length > 0) {
     var timer = new Timer();
     timer.start();
