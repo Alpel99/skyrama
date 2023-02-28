@@ -327,7 +327,7 @@ function startPlanesRandomBuddy() {
 	var nextbuddy = match.getRect().getCenter();
   var move = new Point(-25,-1);
 
-  if(Config.getValue("start_green") && max < 6) {
+  if(Config.getValue("start_green") && max < 5) {
     var c = 0;
     for (var i = 0; i < 6; i++) {
       var col = img.getPixelColor(nextbuddy.pointAdded(move))
@@ -339,7 +339,7 @@ function startPlanesRandomBuddy() {
     max = c < max ? c : max;
   }
   var t = Math.floor(Math.random() * max+1);
-  if(Config.getValue("v_level") > 0) Helper.log("Starting planes to buddy #" + t + ".");
+  if(Config.getValue("v_level") > 0) Helper.log("Starting planes to buddy #" + (t+1) + ".");
   startPlanesBuddy(match.getRect().getCenter().pointAdded(new Point((t+1)*79, 0)))
 }
 
