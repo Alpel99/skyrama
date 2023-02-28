@@ -326,7 +326,7 @@ function startPlanesRandomBuddy() {
 	var match = Vision.findMatch(img, BUDDY_TEMPLATE, 0.98);
 	var nextbuddy = match.getRect().getCenter();
   var move = new Point(-25,-1);
-  nextbuddy.setX(nextbuddy.getX() + 79);
+  // nextbuddy.setX(nextbuddy.getX() + 79);
 
   if(Config.getValue("start_green") && max < 5) {
     var c = 0;
