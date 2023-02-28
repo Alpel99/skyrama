@@ -145,6 +145,7 @@ function landPlanes(buddy) {
     checkTasks(true);
     while(!timer.hasExpired(8000)) {}
     if(buddy) hideBuddyFlags();
+    if(buddy) hideBuddyFlags();
   }
   checkTasks(false);
 }
