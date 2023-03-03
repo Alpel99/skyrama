@@ -430,7 +430,7 @@ function hideBuddyFlags() {
 	for(var i = 0; i < matches2.length; i++) {
     check = matches.some(function(m) {return m.getRect().getCenter() == matches2[i].getRect().getCenter()});
     if(!check) {
-      browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
+      browser.leftClick(matches2[i].getRect().getCenter().pointAdded(move));
       Helper.msleep(125);
     }
 	}
