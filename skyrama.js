@@ -120,16 +120,13 @@ function landPlanes(buddy) {
   var matches = Vision.findMatches(browser.takeScreenshot(), LAND_TEMPLATE, 0.99, maxLandings);
   if (maxLandings > 6 && matches.length == 6) {
     var diff = maxLandings - matches.length;
-    var maxx = 0;
-    var rmatch;
-    matches.forEach(function(m) {
-      if(m.getRect().getCenter().getX() > maxx) {
-        maxx = m.getRect().getCenter().getX();
-        rmatch = m;
-      }
+    matches.sort(function(a,b) {
+      ax = a.getRect().getCenter().getX();
+      bx = b.getRect().getCenter().getX();
+      return a < b ? 1 : -1;
     });
     for (var i = 0; i < diff; i++) {
-      browser.leftClick(rmatch.getRect().getCenter());
+      browser.leftClick(matches[0].getRect().getCenter());
       Helper.msleep(250);
     }
   }
@@ -145,8 +142,7 @@ function landPlanes(buddy) {
     timer.start();
     checkTasks(true);
     while(!timer.hasExpired(8000)) {}
-    if(buddy) hideBuddyFlags();
-    if(buddy) hideBuddyFlags();
+    if(buddy && !QS_AVAILABLE) hideBuddyFlags();
   }
   checkTasks(false);
 }
@@ -250,7 +246,7 @@ function createBuddyTemplate() {
     var sel_buddy = img.copy(new Rect(sel_buddy_point.pointAdded(new Point(20,0)), new Size(55, 85)))
     sel_buddy.save("selectedbuddy.png");
     BUDDY_SELECTED = true;
-    if(Config.getValue("v_level") > 0) Helper.log("Created new selected buddy template 'selectedbuddy.png'.")
+    Helper.log("Created new selected buddy template 'selectedbuddy.png'.")
     Helper.msleep(500);
     SEL_BUDDY_TEMPLATE = new Image("selectedbuddy.png");
     Helper.msleep(500);
@@ -261,7 +257,7 @@ function createBuddyTemplate() {
 
 function startPlanesSelectedBuddy() {
   var img = browser.takeScreenshot();
-  var checkBuddy = Vision.findMatch(img, SEL_BUDDY_TEMPLATE, 0.98);
+  var checkBuddy = Vision.findMatch(img, SEL_BUDDY_TEMPLATE, 0.96);
   if(!checkBuddy.isValid()) {
     var checknot = Config.getValue("start_fallback") ? " " : " not ";
     Helper.log("Buddy no longer found," + checknot + "using fallback");
@@ -302,6 +298,7 @@ function startPlanesCountry() {
     Helper.log("No country selected," + checknot + "using fallback");
     START_FALLBACK = true;
   } else {
+    // this needs some better idea
     Helper.sleep(2);
     var checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
     if(!checkSelect.isValid()) {
@@ -330,7 +327,7 @@ function startPlanesRandomBuddy() {
 
   if(Config.getValue("start_green") && max < 5) {
     var c = 0;
-    for (var i = 0; i < 6; i++) {
+    for (var i = 1; i < 6; i++) {
       var col = img.getPixelColor(nextbuddy.pointAdded(move))
       nextbuddy.setX(nextbuddy.getX() + 79);
       if (col.getRed() < 100) {
@@ -429,7 +426,17 @@ function hideBuddyFlags() {
 		browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
 		Helper.msleep(125);
 	}
+  var matches2 = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
+	for(var i = 0; i < matches2.length; i++) {
+    check = matches.some(function(m) {m.getRect().getCenter() != matches2[i].getRect().getCenter()});
+    if(!check) {
+      browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
+      Helper.msleep(125);
+    }
+	}
   Helper.msleep(125);
+  // hopefully temporary
+  checkCancel();
 }
 
 function activateTower() {
@@ -475,7 +482,7 @@ function useQS() {
       Helper.msleep(125);
     }
   } else {
-    Helper.log("NO QS button found.")
+    if(Config.getValue("v_level") > 1) Helper.log("NO QS button found.")
     QS_AVAILABLE = false;
   }
   Stats.show("Quick Service", "QS clicked", qs_done);

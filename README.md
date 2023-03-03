@@ -26,8 +26,8 @@
     * wastes time, but haven't experienced issues until now, won't go shopping
 - [ ] Unpack/pack is registering with the same template (not really an issue)
 - [ ] Untangle that code into multiple files
-- [ ] Order landing matches by descending x value
-- [ ] Could probably improve performance by cutting some openCV calls
+- [X] Order landing matches by descending x value
+- [ ] Could probably improve performance by cutting some unnecessary openCV calls
 
 
 ### Might also work with english, not tested
@@ -41,10 +41,10 @@
 ### Settings
 #### Auto Login
 * Username and password for auto login
-    * You can also login yourself on the website, might have to wait for the bot to click the cookie accept
+    * You can also log in yourself on the website, might have to wait for the bot to click the cookie accept
 
 #### General
-* Starting the bot without auto login, will check for skyrama url anyways
+* Starting the bot without auto login, will check for skyrama url anyway
 * Time to wait for closing ads/popups & zooming out
 * Delay between each task (pack, fuel etc.) from the bot in 10 ms steps
 
@@ -87,7 +87,7 @@
 
 #### Advanced
 * Delay in ms for the bot to stay at each point of the circle while collecting rings
-* How many points are calculate to describe the form of the ring
+* How many points are calculated to describe the form of the ring
 * Verbosity level: How much info/spam do you want while running the bot
 
 verbosity|output
