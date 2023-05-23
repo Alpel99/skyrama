@@ -226,7 +226,13 @@ function startPlanes() {
       case "country":
         if(Config.getValue("v_level") > 0) Helper.log("Starting planes to country.");
         for (var i = 0; i < Config.getValue("start_num"); i++) {
-          startPlanesCountry();
+          startPlanesCountry(false);
+        }
+        break;
+      case "country_random":
+        if(Config.getValue("v_level") > 0) Helper.log("Starting planes to random country.");
+        for (var i = 0; i < Config.getValue("start_num"); i++) {
+          startPlanesCountry(true);
         }
         break;
       case "random":
@@ -278,7 +284,25 @@ function startPlanesSelectedBuddy() {
   }
 }
 
-function startPlanesCountry() {
+function startPlanesCountrySelected() {
+  // this needs some better idea
+  Helper.sleep(2);
+  var checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+  if(!checkSelect.isValid()) {
+    Helper.sleep(3);
+    checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+  }
+  if(!checkSelect.isValid()) {
+    if(Config.getValue("v_level") > 0) Helper.log("No people in country to start to available.");
+  } else {
+    click(SELECT_TEMPLATE, 0.97);
+    Helper.msleep(125);
+    startPlanesClick();
+    redcross();
+  }
+}
+
+function startPlanesCountry(random) {
   redcross();
 	click(PLANES_TEMPLATE, 0.99);
 	Helper.msleep(500);
@@ -293,25 +317,34 @@ function startPlanesCountry() {
   browser.leftClick(checkGo.getRect().getCenter());
   Helper.msleep(500);
   var checkMap = Vision.findMatch(browser.takeScreenshot(), MAP_TEMPLATE, 0.99);
-  if(!checkMap.isValid()) {
-    var checknot = Config.getValue("start_fallback") ? " " : " not ";
-    Helper.log("No country selected," + checknot + "using fallback");
-    START_FALLBACK = true;
-  } else {
-    // this needs some better idea
-    Helper.sleep(2);
-    var checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
-    if(!checkSelect.isValid()) {
-      Helper.sleep(3);
-      checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+  if (random) {
+    if (checkMap.isValid()) {
+      browser.leftClick(checkMap.getRect().getCenter());
+      Helper.msleep(500);
     }
-    if(!checkSelect.isValid()) {
-      if(Config.getValue("v_level") > 0) Helper.log("No people in country to start to available.");
+    const continents = [
+      new Point(690,425),
+      new Point(750, 600),
+      new Point(950, 450),
+      new Point(1120, 440),
+      new Point(960, 550),
+      new Point(1250, 650),
+    ]
+    browser.leftClick(continents[Math.floor(Math.random() * (continents.length-0.01))]);
+    Helper.msleep(500);
+    const rect = new Rect(new Point(580,350), new Point(1350, 750));
+    for (var country_try = 0; country_try < 10; country_try++) {
+      browser.leftClick(rect.randomPoint());
+      Helper.msleep(20);
+    }
+    startPlanesCountrySelected();
+  } else {
+    if(!checkMap.isValid()) {
+      var checknot = Config.getValue("start_fallback") ? " " : " not ";
+      Helper.log("No country selected," + checknot + "using fallback");
+      START_FALLBACK = true;
     } else {
-      click(SELECT_TEMPLATE, 0.97);
-      Helper.msleep(125);
-      startPlanesClick();
-      redcross();
+      startPlanesCountrySelected();
     }
   }
 }
