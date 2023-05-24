@@ -32,6 +32,8 @@ var QS_TEMPLATE = new Image("templates/QS.png");
 var MAP_TEMPLATE = new Image("templates/map_tpl.png");
 var SELECT_TEMPLATE = new Image("templates/select.png");
 var NFLIGHT_TEMPLATE = new Image("templates/new_flight.png");
+var COINS_TEMPLATE = new Image("templates/coins.png");
+var SHOP_REFILL_TEMPLATE = new Image("templates/shop_refill.png");
 
 
 function click(tpl, trsh) {
@@ -84,9 +86,17 @@ function closeWindows() {
   }
 }
 
-function collectPeople() {
-  var matches = Vision.findMatches(browser.takeScreenshot(), PEOPLE_TEMPLATE, 0.93);
-	if(Config.getValue("v_level") > 1) Helper.log("Collecting passengers " + matches.length + "x.")
+function doShopRefill() {
+  const matches = Vision.findMatches(browser.takeScreenshot(), SHOP_REFILL_TEMPLATE, 0.95);
+  for (var i = 0; i < matches.length; i++) {
+    browser.leftClick(matches[i].getRect().getCenter());
+    redcross();
+  }
+}
+
+function collect(tpl, name) {
+  var matches = Vision.findMatches(browser.takeScreenshot(), tpl, 0.93);
+	if(Config.getValue("v_level") > 1) Helper.log("Collecting " + name + " " + matches.length + "x.")
 	for(var i = 0; i < matches.length; i++) {
   	browser.moveMouse(matches[i].getRect().getCenter());
 		Helper.msleep(125);
@@ -533,8 +543,13 @@ function basicTasks() {
   checkOk();
   checkCancel();
   wait();
-  collectPeople();
+  collect(PEOPLE_TEMPLATE, "passengers");
+  collect(COINS_TEMPLATE, "coins");
   wait();
+  if(Config.getValue("shop_refill")) {
+    doShopRefill();
+    wait();
+  }
   if(Config.getValue("tower")) {
     activateTower();
   }

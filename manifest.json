@@ -70,6 +70,12 @@
 						"default": true
 					},
 					{
+						"id": "shop_refill",
+						"type": "boolean",
+						"label": "Should the shops be refilled if they run out of goods to sell?",
+						"default": true
+					},
+					{
                         "id": "quick_service",
                         "type": "boolean",
                         "label": "Check for quick service? (Will use if avail, will do normal work if it is not.)",
