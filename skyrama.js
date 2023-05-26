@@ -91,10 +91,14 @@ function doShopRefill() {
   const matches = Vision.findMatches(browser.takeScreenshot(), SHOP_REFILL_TEMPLATE, 0.95);
 	if(Config.getValue("v_level") > 1) Helper.log("Refilling shops " + matches.length + "x.")
   for (var i = 0; i < matches.length; i++) {
-    browser.leftClick(matches[i].getRect().getCenter());
-		Helper.msleep(20);
-    browser.leftClick(matches[i].getRect().getCenter());
-    redcross();
+    var shop_point = matches[i].getRect().getCenter().pointAdded(new Point(0, 5))
+  	browser.moveMouse(shop_point);
+		Helper.msleep(125);
+    browser.holdLeft(shop_point);
+		Helper.msleep(125);
+    browser.releaseLeft(shop_point);
+    Helper.msleep(500);
+    checkOk();
   }
 }
 
