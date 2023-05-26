@@ -541,6 +541,8 @@ function main() {
   }
   GLOBAL_TIMER.start()
   while (true) {
+    hideBuddyFlags();
+    wait();
     basicTasks();
     wait();
     checkTasks(false);
