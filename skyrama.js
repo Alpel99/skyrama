@@ -35,6 +35,7 @@ var NFLIGHT_TEMPLATE = new Image("templates/new_flight.png");
 var COINS_TEMPLATE = new Image("templates/coins.png");
 var SHOP_REFILL_TEMPLATE = new Image("templates/shop_refill.png");
 
+var COINS_TEMPLATE_MASK = COINS_TEMPLATE.createMaskFromAlpha();
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -88,14 +89,21 @@ function closeWindows() {
 
 function doShopRefill() {
   const matches = Vision.findMatches(browser.takeScreenshot(), SHOP_REFILL_TEMPLATE, 0.95);
+	if(Config.getValue("v_level") > 1) Helper.log("Refilling shops " + matches.length + "x.")
   for (var i = 0; i < matches.length; i++) {
+    browser.leftClick(matches[i].getRect().getCenter());
+		Helper.msleep(20);
     browser.leftClick(matches[i].getRect().getCenter());
     redcross();
   }
 }
 
-function collect(tpl, name) {
-  var matches = Vision.findMatches(browser.takeScreenshot(), tpl, 0.93);
+function collect(tpl, name, threshold, mask) {
+  var matches = [];
+  if (mask) 
+    matches = Vision.findMaskedMatches(browser.takeScreenshot(), tpl, mask, threshold);
+  else
+    matches = Vision.findMatches(browser.takeScreenshot(), tpl, threshold);
 	if(Config.getValue("v_level") > 1) Helper.log("Collecting " + name + " " + matches.length + "x.")
 	for(var i = 0; i < matches.length; i++) {
   	browser.moveMouse(matches[i].getRect().getCenter());
@@ -543,8 +551,8 @@ function basicTasks() {
   checkOk();
   checkCancel();
   wait();
-  collect(PEOPLE_TEMPLATE, "passengers");
-  collect(COINS_TEMPLATE, "coins");
+  collect(PEOPLE_TEMPLATE, "passengers", 0.93);
+  collect(COINS_TEMPLATE, "coins", 0.95, COINS_TEMPLATE_MASK);
   wait();
   if(Config.getValue("shop_refill")) {
     doShopRefill();
