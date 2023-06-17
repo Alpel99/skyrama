@@ -1,4 +1,4 @@
-var browser = new Browser("Skyrama", new Size(1920, 1080));
+var browser = new Browser("Skyrama_1", new Size(1920, 1080));
 var startedplanes = 0;
 var qs_done = 0;
 var GLOBAL_TIMER = new Timer();
