@@ -154,7 +154,7 @@ function landPlanes(buddy) {
       Helper.msleep(250);
     }
   }
-	for(var i = matches.length; i >= 0; i++) {
+	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(250);
 	}
