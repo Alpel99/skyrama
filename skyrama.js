@@ -118,19 +118,19 @@ function landBuddyPlanes() {
 function landPlanes(buddy) {
 	var maxLandings = Config.getValue("runways");
   var matches = Vision.findMatches(browser.takeScreenshot(), LAND_TEMPLATE, 0.99, maxLandings);
+  matches.sort(function(a,b) {
+    const ax = a.getRect().getCenter().getX();
+    const bx = b.getRect().getCenter().getX();
+    return ax - bx;
+  });
   if (maxLandings > 6 && matches.length == 6) {
     var diff = maxLandings - matches.length;
-    matches.sort(function(a,b) {
-      ax = a.getRect().getCenter().getX();
-      bx = b.getRect().getCenter().getX();
-      return a < b ? 1 : -1;
-    });
     for (var i = 0; i < diff; i++) {
       browser.leftClick(matches[0].getRect().getCenter());
       Helper.msleep(250);
     }
   }
-	for(var i = 0; i < matches.length; i++) {
+	for(var i = matches.length - 1; i >= 0; i--) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(250);
 	}
