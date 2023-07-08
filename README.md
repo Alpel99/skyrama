@@ -16,19 +16,19 @@
 * Counting started planes (Stats tab in botfather) + keeping track of time + planes/min
 * Option to use quick service if available
 * Cancel fast processing if accidentally clicked
+* Fill shops and collect coins
 
-### Known Issues
+### Known Issues/Todo
 
 - [x] Sometimes not everything from the loot on the ring is collected 
     * should be fixable with all tuning options
-
+- [ ] sometimes fails if selected buddy is selected mid-run
 - [ ] Not 100% accurate on image detection (tries to click void stuff sometimes)
     * wastes time, but haven't experienced issues until now, won't go shopping
 - [ ] Unpack/pack is registering with the same template (not really an issue)
 - [ ] Untangle that code into multiple files
-- [X] Order landing matches by descending x value
+- [ ] use transparent background in .png images
 - [ ] Could probably improve performance by cutting some unnecessary openCV calls
-
 
 ### Might also work with english, not tested
 * will probably not support full functionality
@@ -54,6 +54,7 @@
 * Option to enable/disable to activate the tower to receive planes
 * Option to enable/disable check for quick service
     * the bot will fall back to generic service if it detects qs to be unavailable
+* Option to enable filling/selling in the shops
 
 #### Start planes
 * Option to enable/disable starting your planes
@@ -65,6 +66,8 @@
     * To a country: send planes to a country
         * this needs to be preselected by sending one plane there before starting the bot
     * _only the first five buddies can be used, scrolling in the buddy list is not possible/will stop the bot from working_
+    * To a random country: random continent/country is selected
+        * will most likely not hit all countries eventually
 * A number input that has different uses depending on the starting options:
     * Selected buddy: Choose buddy by index
     * Random buddy: How many random buddies
