@@ -12,6 +12,7 @@ var PLANES_TEMPLATE = new Image("templates/planes.png");
 var LANDINGPLANES_DOWN_TEMPLATE = new Image("templates/landingplanes_down.png");
 var LAND_TEMPLATE = new Image("templates/land.png");
 var ARROW_TEMPLATE = new Image("templates/arrow.png");
+var BUDDY_FLAG_TEMPLATE = new Image("templates/buddy_flag.png");
 var RING_TOP_TEMPLATE = new Image("templates/ringtop.png");
 var RING_WHITE_TPL = new Image("templates/ring_white.png");
 var UNPACK_TEMPLATE = new Image("templates/unpack.png");
@@ -34,7 +35,7 @@ var SELECT_TEMPLATE = new Image("templates/select.png");
 var NFLIGHT_TEMPLATE = new Image("templates/new_flight.png");
 var COINS_TEMPLATE = new Image("templates/coins.png");
 var SHOP_REFILL_TEMPLATE = new Image("templates/shop_refill.png");
-
+var BUDDY_FLAG_TEMPLATE_MASK = BUDDY_FLAG_TEMPLATE.createMaskFromAlpha();
 var COINS_TEMPLATE_MASK = COINS_TEMPLATE.createMaskFromAlpha();
 
 function click(tpl, trsh) {
@@ -474,24 +475,14 @@ function flyPlanes() {
 }
 
 function hideBuddyFlags() {
-  var move = new Point(30, 30)
-  var matches = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
+  var move = new Point(0, 5)
+  var matches = Vision.findMaskedMatches(browser.takeScreenshot(), BUDDY_FLAG_TEMPLATE, BUDDY_FLAG_TEMPLATE_MASK, 0.98);
   if(Config.getValue("v_level") > 1) Helper.log("Clicking on " + matches.length + " triangles beneath on planes that have arrows to possibly hide buddy flags.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
 		Helper.msleep(125);
 	}
-  var matches2 = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
-	for(var i = 0; i < matches2.length; i++) {
-    check = matches.some(function(m) {return m.getRect().getCenter() == matches2[i].getRect().getCenter()});
-    if(!check) {
-      browser.leftClick(matches2[i].getRect().getCenter().pointAdded(move));
-      Helper.msleep(125);
-    }
-	}
   Helper.msleep(125);
-  // hopefully temporary
-  checkCancel();
 }
 
 function activateTower() {
@@ -609,6 +600,8 @@ function main() {
   }
   GLOBAL_TIMER.start()
   while (true) {
+    hideBuddyFlags();
+    wait();
     basicTasks();
     wait();
     checkTasks(false);
