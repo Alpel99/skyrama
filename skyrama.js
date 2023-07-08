@@ -103,6 +103,7 @@ function doShopRefill() {
   }
 }
 
+// could add some statistics here
 function collect(tpl, name, threshold, mask) {
   var matches = [];
   if (mask) 
@@ -144,7 +145,7 @@ function landPlanes(buddy) {
   matches.sort(function(a,b) {
     const ax = a.getRect().getCenter().getX();
     const bx = b.getRect().getCenter().getX();
-    return ax - bx;
+    return bx - ax;
   });
   if (maxLandings > 6 && matches.length == 6) {
     var diff = maxLandings - matches.length;
@@ -153,7 +154,7 @@ function landPlanes(buddy) {
       Helper.msleep(250);
     }
   }
-	for(var i = matches.length - 1; i >= 0; i--) {
+	for(var i = matches.length; i >= 0; i++) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(250);
 	}
@@ -353,12 +354,13 @@ function startPlanesCountry(random) {
       new Point(960, 550),
       new Point(1250, 650),
     ]
-    browser.leftClick(continents[Math.floor(Math.random() * (continents.length-0.01))]);
+    browser.leftClick(continents[Math.floor(Math.random() * continents.length)]);
     Helper.msleep(500);
     const rect = new Rect(new Point(580,350), new Point(1350, 750));
+    // Could implement check for visible green "start" button instead of random trying
     for (var country_try = 0; country_try < 10; country_try++) {
       browser.leftClick(rect.randomPoint());
-      Helper.msleep(20);
+      Helper.msleep(50);
     }
     startPlanesCountrySelected();
   } else {
