@@ -32,7 +32,10 @@ var QS_TEMPLATE = new Image("templates/QS.png");
 var MAP_TEMPLATE = new Image("templates/map_tpl.png");
 var SELECT_TEMPLATE = new Image("templates/select.png");
 var NFLIGHT_TEMPLATE = new Image("templates/new_flight.png");
+var COINS_TEMPLATE = new Image("templates/coins.png");
+var SHOP_REFILL_TEMPLATE = new Image("templates/shop_refill.png");
 
+var COINS_TEMPLATE_MASK = COINS_TEMPLATE.createMaskFromAlpha();
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -84,9 +87,28 @@ function closeWindows() {
   }
 }
 
-function collectPeople() {
-  var matches = Vision.findMatches(browser.takeScreenshot(), PEOPLE_TEMPLATE, 0.93);
-	if(Config.getValue("v_level") > 1) Helper.log("Collecting passengers " + matches.length + "x.")
+function doShopRefill() {
+  const matches = Vision.findMatches(browser.takeScreenshot(), SHOP_REFILL_TEMPLATE, 0.95);
+	if(Config.getValue("v_level") > 1) Helper.log("Refilling shops " + matches.length + "x.")
+  for (var i = 0; i < matches.length; i++) {
+    var shop_point = matches[i].getRect().getCenter().pointAdded(new Point(0, 5))
+  	browser.moveMouse(shop_point);
+		Helper.msleep(125);
+    browser.holdLeft(shop_point);
+		Helper.msleep(125);
+    browser.releaseLeft(shop_point);
+    Helper.msleep(500);
+    checkOk();
+  }
+}
+
+function collect(tpl, name, threshold, mask) {
+  var matches = [];
+  if (mask) 
+    matches = Vision.findMaskedMatches(browser.takeScreenshot(), tpl, mask, threshold);
+  else
+    matches = Vision.findMatches(browser.takeScreenshot(), tpl, threshold);
+	if(Config.getValue("v_level") > 1) Helper.log("Collecting " + name + " " + matches.length + "x.")
 	for(var i = 0; i < matches.length; i++) {
   	browser.moveMouse(matches[i].getRect().getCenter());
 		Helper.msleep(125);
@@ -566,8 +588,13 @@ function basicTasks() {
   checkOk();
   checkCancel();
   wait();
-  collectPeople();
+  collect(PEOPLE_TEMPLATE, "passengers", 0.93);
+  collect(COINS_TEMPLATE, "coins", 0.95, COINS_TEMPLATE_MASK);
   wait();
+  if(Config.getValue("shop_refill")) {
+    doShopRefill();
+    wait();
+  }
   if(Config.getValue("tower")) {
     activateTower();
   }
