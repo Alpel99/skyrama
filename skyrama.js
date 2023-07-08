@@ -12,6 +12,7 @@ var PLANES_TEMPLATE = new Image("templates/planes.png");
 var LANDINGPLANES_DOWN_TEMPLATE = new Image("templates/landingplanes_down.png");
 var LAND_TEMPLATE = new Image("templates/land.png");
 var ARROW_TEMPLATE = new Image("templates/arrow.png");
+var BUDDY_FLAG_TEMPLATE = new Image("templates/buddy_flag.png");
 var RING_TOP_TEMPLATE = new Image("templates/ringtop.png");
 var RING_WHITE_TPL = new Image("templates/ring_white.png");
 var UNPACK_TEMPLATE = new Image("templates/unpack.png");
@@ -32,7 +33,10 @@ var QS_TEMPLATE = new Image("templates/QS.png");
 var MAP_TEMPLATE = new Image("templates/map_tpl.png");
 var SELECT_TEMPLATE = new Image("templates/select.png");
 var NFLIGHT_TEMPLATE = new Image("templates/new_flight.png");
-
+var COINS_TEMPLATE = new Image("templates/coins.png");
+var SHOP_REFILL_TEMPLATE = new Image("templates/shop_refill.png");
+var BUDDY_FLAG_TEMPLATE_MASK = BUDDY_FLAG_TEMPLATE.createMaskFromAlpha();
+var COINS_TEMPLATE_MASK = COINS_TEMPLATE.createMaskFromAlpha();
 
 function click(tpl, trsh) {
   var match = Vision.findMatch(browser.takeScreenshot(), tpl, trsh);
@@ -84,9 +88,28 @@ function closeWindows() {
   }
 }
 
-function collectPeople() {
-  var matches = Vision.findMatches(browser.takeScreenshot(), PEOPLE_TEMPLATE, 0.93);
-	if(Config.getValue("v_level") > 1) Helper.log("Collecting passengers " + matches.length + "x.")
+function doShopRefill() {
+  const matches = Vision.findMatches(browser.takeScreenshot(), SHOP_REFILL_TEMPLATE, 0.95);
+	if(Config.getValue("v_level") > 1) Helper.log("Refilling shops " + matches.length + "x.")
+  for (var i = 0; i < matches.length; i++) {
+    var shop_point = matches[i].getRect().getCenter().pointAdded(new Point(0, 5))
+  	browser.moveMouse(shop_point);
+		Helper.msleep(125);
+    browser.holdLeft(shop_point);
+		Helper.msleep(125);
+    browser.releaseLeft(shop_point);
+    Helper.msleep(500);
+    checkOk();
+  }
+}
+
+function collect(tpl, name, threshold, mask) {
+  var matches = [];
+  if (mask) 
+    matches = Vision.findMaskedMatches(browser.takeScreenshot(), tpl, mask, threshold);
+  else
+    matches = Vision.findMatches(browser.takeScreenshot(), tpl, threshold);
+	if(Config.getValue("v_level") > 1) Helper.log("Collecting " + name + " " + matches.length + "x.")
 	for(var i = 0; i < matches.length; i++) {
   	browser.moveMouse(matches[i].getRect().getCenter());
 		Helper.msleep(125);
@@ -118,19 +141,19 @@ function landBuddyPlanes() {
 function landPlanes(buddy) {
 	var maxLandings = Config.getValue("runways");
   var matches = Vision.findMatches(browser.takeScreenshot(), LAND_TEMPLATE, 0.99, maxLandings);
+  matches.sort(function(a,b) {
+    const ax = a.getRect().getCenter().getX();
+    const bx = b.getRect().getCenter().getX();
+    return ax - bx;
+  });
   if (maxLandings > 6 && matches.length == 6) {
     var diff = maxLandings - matches.length;
-    matches.sort(function(a,b) {
-      ax = a.getRect().getCenter().getX();
-      bx = b.getRect().getCenter().getX();
-      return a < b ? 1 : -1;
-    });
     for (var i = 0; i < diff; i++) {
       browser.leftClick(matches[0].getRect().getCenter());
       Helper.msleep(250);
     }
   }
-	for(var i = 0; i < matches.length; i++) {
+	for(var i = matches.length - 1; i >= 0; i--) {
 		browser.leftClick(matches[i].getRect().getCenter());
 		Helper.msleep(250);
 	}
@@ -226,7 +249,13 @@ function startPlanes() {
       case "country":
         if(Config.getValue("v_level") > 0) Helper.log("Starting planes to country.");
         for (var i = 0; i < Config.getValue("start_num"); i++) {
-          startPlanesCountry();
+          startPlanesCountry(false);
+        }
+        break;
+      case "country_random":
+        if(Config.getValue("v_level") > 0) Helper.log("Starting planes to random country.");
+        for (var i = 0; i < Config.getValue("start_num"); i++) {
+          startPlanesCountry(true);
         }
         break;
       case "random":
@@ -278,7 +307,25 @@ function startPlanesSelectedBuddy() {
   }
 }
 
-function startPlanesCountry() {
+function startPlanesCountrySelected() {
+  // this needs some better idea
+  Helper.sleep(2);
+  var checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+  if(!checkSelect.isValid()) {
+    Helper.sleep(3);
+    checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+  }
+  if(!checkSelect.isValid()) {
+    if(Config.getValue("v_level") > 0) Helper.log("No people in country to start to available.");
+  } else {
+    click(SELECT_TEMPLATE, 0.97);
+    Helper.msleep(125);
+    startPlanesClick();
+    redcross();
+  }
+}
+
+function startPlanesCountry(random) {
   redcross();
 	click(PLANES_TEMPLATE, 0.99);
 	Helper.msleep(500);
@@ -293,25 +340,34 @@ function startPlanesCountry() {
   browser.leftClick(checkGo.getRect().getCenter());
   Helper.msleep(500);
   var checkMap = Vision.findMatch(browser.takeScreenshot(), MAP_TEMPLATE, 0.99);
-  if(!checkMap.isValid()) {
-    var checknot = Config.getValue("start_fallback") ? " " : " not ";
-    Helper.log("No country selected," + checknot + "using fallback");
-    START_FALLBACK = true;
-  } else {
-    // this needs some better idea
-    Helper.sleep(2);
-    var checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
-    if(!checkSelect.isValid()) {
-      Helper.sleep(3);
-      checkSelect = Vision.findMatch(browser.takeScreenshot(), SELECT_TEMPLATE, 0.98);
+  if (random) {
+    if (checkMap.isValid()) {
+      browser.leftClick(checkMap.getRect().getCenter());
+      Helper.msleep(500);
     }
-    if(!checkSelect.isValid()) {
-      if(Config.getValue("v_level") > 0) Helper.log("No people in country to start to available.");
+    const continents = [
+      new Point(690,425),
+      new Point(750, 600),
+      new Point(950, 450),
+      new Point(1120, 440),
+      new Point(960, 550),
+      new Point(1250, 650),
+    ]
+    browser.leftClick(continents[Math.floor(Math.random() * (continents.length-0.01))]);
+    Helper.msleep(500);
+    const rect = new Rect(new Point(580,350), new Point(1350, 750));
+    for (var country_try = 0; country_try < 10; country_try++) {
+      browser.leftClick(rect.randomPoint());
+      Helper.msleep(20);
+    }
+    startPlanesCountrySelected();
+  } else {
+    if(!checkMap.isValid()) {
+      var checknot = Config.getValue("start_fallback") ? " " : " not ";
+      Helper.log("No country selected," + checknot + "using fallback");
+      START_FALLBACK = true;
     } else {
-      click(SELECT_TEMPLATE, 0.97);
-      Helper.msleep(125);
-      startPlanesClick();
-      redcross();
+      startPlanesCountrySelected();
     }
   }
 }
@@ -419,24 +475,14 @@ function flyPlanes() {
 }
 
 function hideBuddyFlags() {
-  var move = new Point(30, 30)
-  var matches = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
+  var move = new Point(0, 5)
+  var matches = Vision.findMaskedMatches(browser.takeScreenshot(), BUDDY_FLAG_TEMPLATE, BUDDY_FLAG_TEMPLATE_MASK, 0.98);
   if(Config.getValue("v_level") > 1) Helper.log("Clicking on " + matches.length + " triangles beneath on planes that have arrows to possibly hide buddy flags.");
 	for(var i = 0; i < matches.length; i++) {
 		browser.leftClick(matches[i].getRect().getCenter().pointAdded(move));
 		Helper.msleep(125);
 	}
-  var matches2 = Vision.findMatches(browser.takeScreenshot(), ARROW_TEMPLATE, 0.96);
-	for(var i = 0; i < matches2.length; i++) {
-    check = matches.some(function(m) {return m.getRect().getCenter() == matches2[i].getRect().getCenter()});
-    if(!check) {
-      browser.leftClick(matches2[i].getRect().getCenter().pointAdded(move));
-      Helper.msleep(125);
-    }
-	}
   Helper.msleep(125);
-  // hopefully temporary
-  checkCancel();
 }
 
 function activateTower() {
@@ -533,8 +579,13 @@ function basicTasks() {
   checkOk();
   checkCancel();
   wait();
-  collectPeople();
+  collect(PEOPLE_TEMPLATE, "passengers", 0.93);
+  collect(COINS_TEMPLATE, "coins", 0.95, COINS_TEMPLATE_MASK);
   wait();
+  if(Config.getValue("shop_refill")) {
+    doShopRefill();
+    wait();
+  }
   if(Config.getValue("tower")) {
     activateTower();
   }
@@ -549,6 +600,8 @@ function main() {
   }
   GLOBAL_TIMER.start()
   while (true) {
+    hideBuddyFlags();
+    wait();
     basicTasks();
     wait();
     checkTasks(false);
