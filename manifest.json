@@ -70,6 +70,12 @@
 						"default": true
 					},
 					{
+						"id": "shop_refill",
+						"type": "boolean",
+						"label": "Should the shops be refilled if they run out of goods to sell?",
+						"default": true
+					},
+					{
                         "id": "quick_service",
                         "type": "boolean",
                         "label": "Check for quick service? (Will use if avail, will do normal work if it is not.)",
@@ -95,7 +101,8 @@
 							"To the first buddy": "first",
 							"To a selected buddy": "selected",
 							"To a random buddy of the 5 shown": "random",
-							"To a country": "country"
+							"To a country": "country",
+              "To a random country": "country_random"
 						}
 					},
 					{
