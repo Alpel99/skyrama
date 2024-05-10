@@ -51,7 +51,14 @@ function loadWebsiteLogin() {
   browser.loadUrl("https://www.skyrama.com/");
 	browser.finishLoading();
 
-  Helper.sleep(5);
+  // Helper.sleep(5);
+  longSleep(5);
+
+  Helper.log("Trying to click cookie accept button using javascript.");
+  // var clickOK = "document.querySelector('button.css-k8o10q')?.click()";
+  var clickOK = 'var button = document.querySelector("button.css-k8o10q");button && button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));';
+  browser.executeJavascript(clickOK)
+
 	Helper.log("Entering account credentials.");
 
 	var fill_uname_js = "document.getElementById('bgcdw_login_form_username').value = '" + username + "';";
@@ -67,24 +74,26 @@ function loadWebsiteLogin() {
 	Helper.sleep(2);
 
 	browser.finishLoading();
-	Helper.sleep(10);
+	// Helper.sleep(10);
+  longSleep(10);
 	Helper.log("Logged in.");
 }
 
 function closeWindows() {
-  click(COOKIE_ACCEPT_TEMPLATE, 0.95);
 	Helper.sleep(1);
 	Helper.log("Please close all ad windows, etc.");
 	for(var i = 0; i < Config.getValue("windowwait"); i+=5) {
 		var remaining = Config.getValue("windowwait")-i;
 		Helper.log("Please close windows. Time remaining: " + remaining);
-		Helper.sleep(5);
+		// Helper.sleep(5);
+    longSleep(5);
 	}
 	Helper.log("Please go fullscreen and zoom as far out as possible! (The Bot doesn't move the camera itself)");
   for(var i = 0; i < Config.getValue("camerawait"); i+=5) {
     var remaining = Config.getValue("camerawait")-i;
     Helper.log("Time remaining: " + remaining);
-    Helper.sleep(5);
+    // Helper.sleep(5);
+    longSleep(5)
   }
 }
 
@@ -592,6 +601,13 @@ function basicTasks() {
     activateTower();
   }
   wait();
+}
+
+function longSleep(secs) {
+  var step = 1
+  for(var i = 0; i < secs; i+=step) {
+    Helper.sleep(step)
+  }
 }
 
 function main() {
