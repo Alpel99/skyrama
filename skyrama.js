@@ -48,7 +48,7 @@ function loadWebsiteLogin() {
 	var passwd = Config.getValue("auto_login_password");
 	Helper.log("Loading game website.");
 
-  browser.loadUrl("https://www.skyrama.com/");
+  browser.loadUrl("https://www.skyrama.com/?locale=de");
 	browser.finishLoading();
 
   // Helper.sleep(5);
